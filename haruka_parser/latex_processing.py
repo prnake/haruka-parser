@@ -709,7 +709,7 @@ def extract_math(tree, replacement_manager, info):
             parent = script_tag.parent
             parent.remove_child(script_tag)
 
-    for tex_attr in ["tex", "data-tex"]:
+    for tex_attr in ["tex", "data-tex", "data-formula"]:
         for tex_attr_tag in tree.document.query_selector_all(f"[{tex_attr}]"):
             try:
                 text = tex_attr_tag.getattr(tex_attr)
