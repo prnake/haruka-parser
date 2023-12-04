@@ -97,6 +97,7 @@ from haruka_parser.latex_processing import (
     replace_math_tags_with_dollar_signs,
 )
 from haruka_parser.tree_processing import (
+    remove_jax_ignore,
     remove_buttons,
     remove_image_figures,
     extract_code,
@@ -151,6 +152,9 @@ def filter_tree(tree, replacement_manager, config, info):
     if config["markdown_code"]:
         # Wrap the code in markdown code blocks
         extract_code(tree, replacement_manager, info)
+
+    if config["extract_latex"]:
+        remove_jax_ignore(tree)
 
     # Record the location of headings and format them
     extract_headings(tree, replacement_manager, config["markdown_headings"])

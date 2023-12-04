@@ -7,6 +7,15 @@ import re
 header_to_format = {f"h{i}": f"[heading_{i}]" for i in range(1, 7)}
 
 
+def remove_jax_ignore(tree):
+    # select all *jax_ignore class
+    elements = tree.document.query_selector_all("[class*='jax_ignore']")
+    for element in elements:
+        parent = element.parent
+        if parent:
+            parent.remove_child(element)
+
+
 def remove_buttons(tree):
     btns = tree.document.query_selector_all(".btn")
     for btn in btns:
