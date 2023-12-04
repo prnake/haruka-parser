@@ -8,6 +8,6 @@ setup(
     description="A simple HTML Parser",
     author="papersnake",
     packages=["haruka_parser"],
-    install_requires=["py_asciimath", "inscriptis", "tabulate", "inscriptis", "numpy", "resiliparse"],
+    install_requires=["py_asciimath", "inscriptis", "tabulate", "numpy", "resiliparse"],
     include_package_data=True,
 )
