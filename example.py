@@ -1,10 +1,3 @@
-# Haruka Parser
-
-A simple HTML Parser
-
-## Usage
-
-```python3
 from haruka_parser.extract import extract_text
 
 html = """<!DOCTYPE html>
@@ -63,4 +56,3 @@ configuration = {
 text, info = extract_text(html, configuration)
 print(text)
 print(info)
-```

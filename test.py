@@ -124,7 +124,6 @@ if __name__ == "__main__":
     import sys
 
     configuration = {
-        # 其他配置项...
         "readability": False,
         "skip_large_links": False,
         "extract_latex": True,
@@ -135,15 +134,13 @@ if __name__ == "__main__":
         "markdown_code": True,
         "markdown_headings": True,
         "table_config": {
-            "format": "html",  # 或者其他的格式
+            "format": "html",
             "min_rows": 3,
             "min_cols": 2,
-            # 其他表格配置项...
         },
         "remove_chinese": False,
         "boilerplate_config": {
-            "enable": False,  # 或者 False，根据需要设置
-            # 其他模板配置项...
+            "enable": False,
             "ratio_threshold": 0.18,
             "absolute_threshold": 10,
             "end_threshold": 15,

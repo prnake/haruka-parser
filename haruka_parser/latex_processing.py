@@ -642,11 +642,12 @@ def extract_math(tree, replacement_manager, info):
         info["wp-katex-eq"] += 1
 
     # Find all script[type="math/tex"] tags and replace them with spans
-    latex_script_tags = tree.document.query_selector_all('script[type="math/tex"]')
+    latex_script_tags = tree.document.query_selector_all('script[type*="math/tex"]')
     for script_tag in latex_script_tags:
         text = script_tag.text
         new_span = tree.create_element("span")
-        wrapped_text = wrap_math(text)
+        display = "display" in script_tag.getattr("type")
+        wrapped_text = wrap_math(text, display=display)
         new_span.html = replacement_manager.add_replacement(wrapped_text, tag="math")
         parent = script_tag.parent
         parent.replace_child(new_span, script_tag)
@@ -655,7 +656,7 @@ def extract_math(tree, replacement_manager, info):
         info["script_math_tex"] += 1
 
     asciimath_script_tags = tree.document.query_selector_all(
-        'script[type="math/asciimath"]'
+        'script[type*="math/asciimath"]'
     )
     for script_tag in asciimath_script_tags:
         try:
