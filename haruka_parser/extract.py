@@ -212,6 +212,8 @@ def html_preprocessing(html, config):
     html = replace_tags(html, "</frameset>", "</div>")
     html = html.replace("&lt;math&gt;", "[itex]")
     html = html.replace("&lt;/math&gt;", "[/itex]")
+    html = html.replace("$", "[extract_single_dollar]")
+    html = html.replace("§", "[extract_single_chapter]")
     return html
 
 
@@ -306,9 +308,11 @@ def extract_text(html, config):
     # Create the final string
     text = "\n".join(lines)
 
-    if config["extract_latex"]:
+    if config["extract_latex"] and config["escape_dollars"]:
         # Escape any dollar signs in the text
-        text = text.replace("$", "\\$")
+        text = text.replace("[extract_single_dollar]", "\\$")
+    else:
+        text = text.replace("[extract_single_dollar]", "$")
 
     # Now, add the dollar signs for math
     text = replace_math_tags_with_dollar_signs(text)
@@ -323,6 +327,7 @@ def extract_text(html, config):
     text = re.sub(r"\n{3,}", "\n\n", text)
 
     text = replacement_manager.remove_tags(text)
+    text = text.replace("[extract_single_chapter]", "§")
 
     text = text.strip()
 
