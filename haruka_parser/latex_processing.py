@@ -6,7 +6,7 @@ import html
 import os
 import json
 from resiliparse.parse.html import traverse_dom
-import urllib3
+import html
 from urllib.parse import unquote
 
 logging.getLogger().setLevel(logging.ERROR)
@@ -168,6 +168,8 @@ transform = ET.XSLT(xslt)
 
 def mml_to_latex(mml_code):
     # Remove any attibutes from the math tag
+    # Attention: replace into [itex] in the begining
+    mml_code = mml_code.replace("[itex]", "<math>").replace("[/itex]", "</math>")
     mml_code = re.sub(r"(<math.*?>)", r"\1", mml_code)
     mml_ns = mml_code.replace(
         "<math>", '<math xmlns="http://www.w3.org/1998/Math/MathML">'
@@ -187,8 +189,8 @@ def wrap_math(s, display=False):
     if len(s) == 0:
         return s
     # Don't wrap if it's already in \align
-    if "align" in s:
-        return s
+    # if "align" in s:
+    #     return s
     if display:
         return "[extract_tex]" + s + "[/extract_tex]"
     return "[extract_itex]" + s + "[/extract_itex]"
@@ -676,6 +678,89 @@ def extract_math(tree, replacement_manager, info):
             parent = script_tag.parent
             parent.remove_child(script_tag)
 
+    mathml_script_tags = tree.document.query_selector_all('script[type*="math/mml"]')
+    for script_tag in mathml_script_tags:
+        try:
+            # Try translating to LaTeX
+            mathml = script_tag.text
+            mathml = html.unescape(mathml)
+            # If this includes xmlns:mml, then we need to replace all
+            # instances of mml: with nothing
+            if "xmlns:mml" in mathml:
+                mathml = mathml.replace("mml:", "")
+                # replace xmlns:mml="..." with nothing
+                mathml = re.sub(r'xmlns:mml=".*?"', "", mathml)
+            latex = mml_to_latex(mathml)
+            # Make a new span tag
+            new_span = tree.create_element("span")
+            # Set the html of the new span tag to the text
+            wrapped_latex = wrap_math(latex)
+            new_span.html = replacement_manager.add_replacement(
+                wrapped_latex, tag="math"
+            )
+            # Then, we need to replace the math tag with the new span tag
+            parent = script_tag.parent
+            parent.replace_child(new_span, script_tag)
+            if len(wrapped_latex.strip()) > 0:
+                info["found_math"] = True
+            info["mathml"] += 1
+        except Exception as e:
+            # Delete this script tag
+            parent = script_tag.parent
+            parent.remove_child(script_tag)
+
+    for tex_attr in ["tex", "data-tex"]:
+        for tex_attr_tag in tree.document.query_selector_all(f"[{tex_attr}]"):
+            try:
+                text = tex_attr_tag.getattr(tex_attr)
+                if text is None:
+                    continue
+                text = html.unescape(unquote(text))
+                new_span = tree.create_element("span")
+                wrapped_text = wrap_math(text)
+                new_span.html = replacement_manager.add_replacement(
+                    wrapped_text, tag="math"
+                )
+                parent = tex_attr_tag.parent
+                parent.replace_child(new_span, tex_attr_tag)
+                if len(wrapped_text.strip()) > 0:
+                    info["found_math"] = True
+                info["script_math_tex"] += 1
+            except:
+                pass
+
+    for tex_attr in ["mathml", "data-mathml"]:
+        for tex_attr_tag in tree.document.query_selector_all(f"[{tex_attr}]"):
+            try:
+                mathml = tex_attr_tag.getattr(tex_attr)
+                if mathml is None:
+                    continue
+                mathml = html.unescape(mathml)
+                # If this includes xmlns:mml, then we need to replace all
+                # instances of mml: with nothing
+                if "xmlns:mml" in mathml:
+                    mathml = mathml.replace("mml:", "")
+                    # replace xmlns:mml="..." with nothing
+                    mathml = re.sub(r'xmlns:mml=".*?"', "", mathml)
+                latex = mml_to_latex(mathml)
+                # Make a new span tag
+                new_span = tree.create_element("span")
+                # Set the html of the new span tag to the text
+                wrapped_latex = wrap_math(latex)
+                new_span.html = replacement_manager.add_replacement(
+                    wrapped_latex, tag="math"
+                )
+                # Then, we need to replace the math tag with the new span tag
+                parent = tex_attr_tag.parent
+                parent.replace_child(new_span, tex_attr_tag)
+                if len(wrapped_latex.strip()) > 0:
+                    info["found_math"] = True
+                info["mathml"] += 1
+            except Exception as e:
+                # Delete this script tag
+                parent = tex_attr_tag.parent
+                parent.remove_child(tex_attr_tag)
+
     # For katex, find all elements with class = tex
     katex_spans = tree.document.query_selector_all(".tex")
     for katex_span in katex_spans:
@@ -759,20 +844,14 @@ def extract_math(tree, replacement_manager, info):
                 alttext = math_tag.getattr("alttext")
             else:
                 alttext = math_tag.getattr("data-code")
+            alttext = html.unescape(unquote(alttext))
             new_span = tree.create_element("span")
             # Set the html of the new span tag to the text
             if math_tag.getattr("data-math-language") == "asciimath":
                 wrapped_alttext = wrap_math(extract_asciimath(alttext))
             elif math_tag.getattr("data-math-language") == "mathml":
-                # attention: replace into [itex] in the begining
                 try:
-                    wrapped_alttext = wrap_math(
-                        mml_to_latex(
-                            alttext.replace("[itex]", "<math>").replace(
-                                "[/itex]", "</math>"
-                            )
-                        )
-                    )
+                    wrapped_alttext = wrap_math(mml_to_latex(alttext))
                 except:
                     wrapped_alttext = wrap_math(alttext)
             else:
