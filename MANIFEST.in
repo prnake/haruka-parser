@@ -1,0 +1,2 @@
+include haruka_parser/dictionary/*.txt
+include haruka_parser/mmltex/*.xsl
