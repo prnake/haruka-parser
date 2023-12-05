@@ -1,5 +1,6 @@
 import re
 import os
+from haruka_parser.latex_processing import replace_math_tags_with_dollar_signs
 
 edit_regex = r"\[(e|E)dit\]"
 
@@ -95,3 +96,18 @@ def remove_boilerplate(lines, boilerplate_config, replacement_manager):
         else:
             output_lines.append(lines[i])
     return output_lines
+
+
+def restore_replacements(text, replacement_manager, config):
+    if config["extract_latex"] and config["escape_dollars"]:
+        # Escape any dollar signs in the text
+        text = text.replace("[extract_single_dollar]", "\\$")
+    else:
+        text = text.replace("[extract_single_dollar]", "$")
+
+    # Now, add the dollar signs for math
+    text = replace_math_tags_with_dollar_signs(text)
+
+    text = replacement_manager.remove_tags(text)
+    text = text.replace("[extract_single_chapter]", "§")
+    return text

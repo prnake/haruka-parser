@@ -115,6 +115,7 @@ from haruka_parser.line_processing import (
     remove_edit_buttons,
     remove_chinese_characters,
     remove_boilerplate,
+    restore_replacements,
 )
 from haruka_parser.utils import ReplacementManager
 
@@ -163,7 +164,7 @@ def filter_tree(tree, replacement_manager, config, info):
     remove_dense_links(tree)
 
     # Format tables
-    extract_tables(tree.document, replacement_manager, config["table_config"])
+    extract_tables(tree.document, replacement_manager, config)
 
     # Process stack exchange separators
     add_se_separators(tree)
@@ -308,26 +309,15 @@ def extract_text(html, config):
     # Create the final string
     text = "\n".join(lines)
 
-    if config["extract_latex"] and config["escape_dollars"]:
-        # Escape any dollar signs in the text
-        text = text.replace("[extract_single_dollar]", "\\$")
-    else:
-        text = text.replace("[extract_single_dollar]", "$")
-
-    # Now, add the dollar signs for math
-    text = replace_math_tags_with_dollar_signs(text)
-
     if config["remove_edit_buttons"]:
         # Remove edit buttons
         lines = text.split("\n")
         lines = remove_edit_buttons(lines)
         text = "\n".join(lines)
 
+    text = restore_replacements(text, replacement_manager, config)
     # If there are over two newlines in a row, replace with two
     text = re.sub(r"\n{3,}", "\n\n", text)
-
-    text = replacement_manager.remove_tags(text)
-    text = text.replace("[extract_single_chapter]", "§")
 
     text = text.strip()
 

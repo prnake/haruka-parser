@@ -46,10 +46,10 @@ class ReplacementManager:
     It contains a method to remove these tags."""
 
     def __init__(self):
-        self.tags = []
+        self.tags = set()
 
     def add_replacement(self, text, tag='default'):
-        self.tags.append(tag)
+        self.tags.add(tag)
         return f'§§{tag}§§' + text
     
     def remove_tags(self, text):

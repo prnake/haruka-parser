@@ -1,8 +1,7 @@
 from haruka_parser.utils import has_style
+from haruka_parser.line_processing import restore_replacements
 from tabulate import tabulate
-from resiliparse.parse.html import traverse_dom
 from resiliparse.parse.html import DOMCollection
-import re
 
 header_to_format = {f"h{i}": f"[heading_{i}]" for i in range(1, 7)}
 
@@ -199,11 +198,15 @@ def extract_code(tree, replacement_manager, info):
                 )
 
 
-def extract_tables(node, replacement_manager, table_config):
-    if table_config["format"] == "none":
-        return
+def extract_tables(node, replacement_manager, config):
     # Don't worry about tables that have tables in them or have headers
     # tables = node.query_selector_all('table:not(:has(table *))')
+    tables = node.query_selector_all("table:not(:has(table))")
+    for table in tables:
+        # restore table first in order to handle indent corrently
+        table.html = restore_replacements(table.html, replacement_manager, config)
+    if config["table_config"]["format"] == "none":
+        return
     tables = node.query_selector_all("table:not(:has(table, h1, h2, h3, h4, h5, h6))")
     for table in tables:
         table_data = []
@@ -234,7 +237,8 @@ def extract_tables(node, replacement_manager, table_config):
                     # Add empty cells for colspans
                     for _ in range(col_span - 1):
                         row_data.append("")
-            table_data.append(row_data)
+            if row_data:
+                table_data.append(row_data)
         if len(table_data) == 0 or len(table_data[0]) == 0:
             continue
         # Post processing
@@ -266,8 +270,8 @@ def extract_tables(node, replacement_manager, table_config):
                 table_data[i][j] = table_data[i][j].replace("\n", " ")
         # Check that the table has at least one row and one column
         if (
-            len(table_data) >= table_config["min_rows"]
-            and len(table_data[0]) >= table_config["min_cols"]
+            len(table_data) >= config["table_config"]["min_rows"]
+            and len(table_data[0]) >= config["table_config"]["min_cols"]
         ):
             # Replace the table with a markdown
             parent = table.parent
@@ -275,7 +279,9 @@ def extract_tables(node, replacement_manager, table_config):
                 if len(headers) == 0:
                     headers = [""] * len(table_data[0])
                 rendered_table = tabulate(
-                    table_data, tablefmt=table_config["format"], headers=headers
+                    table_data,
+                    tablefmt=config["table_config"]["format"],
+                    headers=headers,
                 )
                 table.html = replacement_manager.add_replacement(
                     rendered_table, tag="table"

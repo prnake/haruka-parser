@@ -653,6 +653,12 @@ def extract_math(tree, replacement_manager, info):
         new_span.html = replacement_manager.add_replacement(wrapped_text, tag="math")
         parent = script_tag.parent
         parent.replace_child(new_span, script_tag)
+        mathjax_id = script_tag.getattr("id")
+        if mathjax_id:
+            mathjax_id = "-".join(mathjax_id.split("-")[:3])
+            for unused_tag in parent.query_selector_all(f'[id*="{mathjax_id}"]'):
+                unused_tag_parent = unused_tag.parent
+                unused_tag_parent.remove_child(unused_tag)
         if len(wrapped_text.strip()) > 0:
             info["found_math"] = True
         info["script_math_tex"] += 1
@@ -923,7 +929,6 @@ def extract_math(tree, replacement_manager, info):
         info["mathjax_tag"] += 1
 
     return tree, info
-
 
 def remove_color(text):
     return re.sub(color_regex, "", text)
