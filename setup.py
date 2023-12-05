@@ -6,6 +6,8 @@ setup(
     name="haruka_parser",
     version="0.2.2",
     description="A simple HTML Parser",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     author="papersnake",
     author_email="prnake@gmail.com",
     url="https://github.com/prnake/haruka-parser",
