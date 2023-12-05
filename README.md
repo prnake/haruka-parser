@@ -32,7 +32,6 @@ html = """<!DOCTYPE html>
 <script type="math/asciimath">
 e^(i*pi) = -1
 </script>
-
 </body>
 </html>"""
 
@@ -41,6 +40,7 @@ configuration = {
     "skip_large_links": False,
     "extract_latex": True,
     "extract_cnki_latex": False,
+    "escape_dollars": True,
     "remove_buttons": True,
     "remove_edit_buttons": True,
     "remove_image_figures": True,
