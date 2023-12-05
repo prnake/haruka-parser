@@ -4,7 +4,7 @@ from setuptools import setup
 # OpenWebMath is made available under an ODC-By 1.0 license; users should also abide by the CommonCrawl ToU: https://commoncrawl.org/terms-of-use/. We do not alter the license of any of the underlying data.
 setup(
     name="haruka_parser",
-    version="0.2.0",
+    version="0.2.1",
     description="A simple HTML Parser",
     author="papersnake",
     author_email="prnake@gmail.com",
