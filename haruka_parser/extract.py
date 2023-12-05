@@ -14,6 +14,15 @@ from inscriptis.model.canvas import Canvas
 RE_STRIP_XML_DECLARATION = re.compile(r"^<\?xml [^>]+?\?>")
 
 
+def get_lxml_title(lxml_tree):
+    title = lxml_tree.findtext(".//title")
+    if title is None:
+        title = lxml_tree.findtext(".//h1")
+    if title is None:
+        title = lxml_tree.findtext(".//meta[@name='title']")
+    return title or ""
+
+
 def get_lxml_tree(html_content):
     """Obtain the HTML parse tree for the given HTML content.
 
@@ -247,6 +256,7 @@ def extract_text(html, config):
         "x-ck12": 0,
         "texerror": 0,
         "code_block": 0,
+        "title": "",
     }
 
     if not html:
@@ -271,6 +281,7 @@ def extract_text(html, config):
 
     lxml_tree = get_lxml_tree(str(tree))
     if lxml_tree is not None:
+        info["title"] = restore_replacements(get_lxml_title(lxml_tree), replacement_manager, config)
         text = CustomInscriptis(
             lxml_tree,
             ParserConfig(css=CSS_PROFILES["strict"], display_images=False),

@@ -98,7 +98,15 @@ def remove_boilerplate(lines, boilerplate_config, replacement_manager):
     return output_lines
 
 
+def remove_headings(text):
+    """Delete [heading_i], which also handling in post_process_headings"""
+    for i in range(6, 0, -1):
+        text = text.replace("[heading_%d]" % i, "")
+    return text
+
+
 def restore_replacements(text, replacement_manager, config):
+    text = remove_headings(text)
     if config["extract_latex"] and config["escape_dollars"]:
         # Escape any dollar signs in the text
         text = text.replace("[extract_single_dollar]", "\\$")
@@ -110,4 +118,4 @@ def restore_replacements(text, replacement_manager, config):
 
     text = replacement_manager.remove_tags(text)
     text = text.replace("[extract_single_chapter]", "§")
-    return text
+    return text.strip()

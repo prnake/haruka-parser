@@ -164,4 +164,4 @@ if __name__ == "__main__":
         print(data["content"])
     else:
         a, info = extract_text(html, configuration)
-        print(a)
+        print(a, info)
