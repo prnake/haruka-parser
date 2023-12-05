@@ -205,8 +205,8 @@ def extract_tables(node, replacement_manager, config):
     for table in tables:
         # restore table first in order to handle indent corrently
         table.html = restore_replacements(table.html, replacement_manager, config)
-    if config["table_config"]["format"] == "none":
-        return
+    # if config["table_config"]["format"] == "none":
+    #     return
     tables = node.query_selector_all("table:not(:has(table, h1, h2, h3, h4, h5, h6))")
     for table in tables:
         table_data = []
@@ -269,10 +269,11 @@ def extract_tables(node, replacement_manager, config):
             for j in range(len(table_data[i])):
                 table_data[i][j] = table_data[i][j].replace("\n", " ")
         # Check that the table has at least one row and one column
-        if (
-            len(table_data) >= config["table_config"]["min_rows"]
-            and len(table_data[0]) >= config["table_config"]["min_cols"]
-        ):
+        # if (
+        #     len(table_data) >= config["table_config"]["min_rows"]
+        #     and len(table_data[0]) >= config["table_config"]["min_cols"]
+        # ):
+        if len(table_data) >= 1 and len(table_data[0]) >= 1:
             # Replace the table with a markdown
             parent = table.parent
             if parent:
@@ -280,7 +281,8 @@ def extract_tables(node, replacement_manager, config):
                     headers = [""] * len(table_data[0])
                 rendered_table = tabulate(
                     table_data,
-                    tablefmt=config["table_config"]["format"],
+                    # tablefmt=config["table_config"]["format"],
+                    tablefmt="html",
                     headers=headers,
                 )
                 table.html = replacement_manager.add_replacement(

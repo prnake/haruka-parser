@@ -134,11 +134,6 @@ if __name__ == "__main__":
         "remove_image_figures": True,
         "markdown_code": True,
         "markdown_headings": True,
-        "table_config": {
-            "format": "html",
-            "min_rows": 3,
-            "min_cols": 2,
-        },
         "remove_chinese": False,
         "boilerplate_config": {
             "enable": False,
