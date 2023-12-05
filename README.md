@@ -2,6 +2,12 @@
 
 A simple HTML Parser
 
+## Install
+
+```bash
+pip install haruka-parser
+```
+
 ## Usage
 
 ```python3
