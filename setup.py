@@ -19,6 +19,7 @@ setup(
         "numpy",
         "resiliparse",
         "ftfy",
+        "readability-lxml",
     ],
     include_package_data=True,
     classifiers=(
