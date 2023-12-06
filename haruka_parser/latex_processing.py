@@ -6,7 +6,6 @@ import html
 import os
 import json
 from resiliparse.parse.html import traverse_dom
-import html
 from urllib.parse import unquote
 
 logging.getLogger().setLevel(logging.ERROR)
@@ -212,7 +211,7 @@ def get_math_config(html):
 
 
 def html_unescape(s):
-    return html.unescape(s)
+    return html.unescape(html.unescape(s))
 
 
 def replace_math_tags_with_dollar_signs(text):
@@ -607,7 +606,7 @@ def extract_math(tree, replacement_manager, info):
         try:
             # Try translating to LaTeX
             mathml = script_tag.text
-            mathml = html.unescape(mathml)
+            mathml = html_unescape(mathml)
             # If this includes xmlns:mml, then we need to replace all
             # instances of mml: with nothing
             if "xmlns:mml" in mathml:
@@ -639,7 +638,7 @@ def extract_math(tree, replacement_manager, info):
                 text = tex_attr_tag.getattr(tex_attr)
                 if text is None:
                     continue
-                text = html.unescape(unquote(text))
+                text = html_unescape(unquote(text))
                 new_span = tree.create_element("span")
                 wrapped_text = wrap_math(text)
                 new_span.html = replacement_manager.add_replacement(
@@ -659,7 +658,7 @@ def extract_math(tree, replacement_manager, info):
                 mathml = tex_attr_tag.getattr(tex_attr)
                 if mathml is None:
                     continue
-                mathml = html.unescape(mathml)
+                mathml = html_unescape(mathml)
                 # If this includes xmlns:mml, then we need to replace all
                 # instances of mml: with nothing
                 if "xmlns:mml" in mathml:
@@ -768,7 +767,7 @@ def extract_math(tree, replacement_manager, info):
                 alttext = math_tag.getattr("alttext")
             else:
                 alttext = math_tag.getattr("data-code")
-            alttext = html.unescape(unquote(alttext))
+            alttext = html_unescape(unquote(alttext))
             new_span = tree.create_element("span")
             # Set the html of the new span tag to the text
             if math_tag.getattr("data-math-language") == "asciimath":
@@ -823,7 +822,7 @@ def extract_math(tree, replacement_manager, info):
     for mathjax_tag in mathjax_tags:
         # Get the inner text of the mathjax tag
         text = mathjax_tag.text
-        text = html.unescape(text)
+        text = html_unescape(text)
         # Use regex to find text wrapped in hashes
         matches = re.findall(r"#(.+?)#", text)
         # For each match, replace the match with the LaTeX
