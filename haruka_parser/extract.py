@@ -11,6 +11,37 @@ import ftfy
 import lxml.html
 from inscriptis.model.canvas import Canvas
 
+
+from haruka_parser.latex_processing import (
+    extract_math,
+    extract_delimited_math,
+    get_math_config,
+)
+from haruka_parser.tree_processing import (
+    remove_jax_ignore,
+    remove_buttons,
+    remove_image_figures,
+    extract_code,
+    extract_tables,
+    extract_headings,
+    remove_dense_links,
+    add_se_separators,
+    wikipedia_preprocess,
+    remove_display_none,
+    main_content_preprocess,
+    post_process_headings,
+    get_lxml_title,
+    get_lxml_tree,
+)
+from haruka_parser.line_processing import (
+    remove_empty_headers,
+    remove_edit_buttons,
+    remove_chinese_characters,
+    remove_boilerplate,
+    restore_replacements,
+)
+from haruka_parser.utils import ReplacementManager
+
 DEFAULT_CONFIG = {
     "readability": False,
     "skip_large_links": False,
@@ -30,47 +61,6 @@ DEFAULT_CONFIG = {
         "end_threshold": 15,
     },
 }
-
-
-RE_STRIP_XML_DECLARATION = re.compile(r"^<\?xml [^>]+?\?>")
-
-
-def get_lxml_title(lxml_tree):
-    title = lxml_tree.findtext(".//title")
-    if title is None:
-        title = lxml_tree.findtext(".//h1")
-    if title is None:
-        title = lxml_tree.findtext(".//meta[@name='title']")
-    return title or ""
-
-
-def get_lxml_tree(html_content):
-    """Obtain the HTML parse tree for the given HTML content.
-
-    Args:
-        html_content: The content to parse.
-
-    Returns:
-        The corresponding HTML parse tree.
-    """
-    html_content = html_content.strip()
-    if not html_content:
-        return None
-
-    # strip XML declaration, if necessary
-    if html_content.startswith("<?xml "):
-        html_content = RE_STRIP_XML_DECLARATION.sub("", html_content, count=1)
-
-    try:
-        return lxml.html.document_fromstring(
-            html_content.encode("utf-8", "replace"),
-            parser=lxml.html.HTMLParser(encoding="utf-8"),
-        )
-    except:
-        try:
-            return lxml.html.fromstring("<pre>" + html_content + "</pre>")
-        except:
-            return None
 
 
 class CustomInscriptis(Inscriptis):
@@ -118,40 +108,6 @@ class CustomInscriptis(Inscriptis):
 
     def _start_li(self, _):
         pass
-
-
-from haruka_parser.latex_processing import (
-    extract_math,
-    extract_delimited_math,
-    get_math_config,
-    replace_math_tags_with_dollar_signs,
-)
-from haruka_parser.tree_processing import (
-    remove_jax_ignore,
-    remove_buttons,
-    remove_image_figures,
-    extract_code,
-    extract_tables,
-    extract_headings,
-    remove_dense_links,
-    add_se_separators,
-    wikipedia_preprocess,
-    remove_display_none,
-    main_content_preprocess,
-    post_process_headings,
-)
-from haruka_parser.line_processing import (
-    remove_empty_headers,
-    remove_edit_buttons,
-    remove_chinese_characters,
-    remove_boilerplate,
-    restore_replacements,
-)
-from haruka_parser.utils import ReplacementManager
-
-import faulthandler
-
-faulthandler.enable()
 
 
 selectors_path = os.path.join(
@@ -284,12 +240,16 @@ def extract_text(html, config=DEFAULT_CONFIG):
 
     if not html:
         return "", info
-    
+
     # NFCK normalization
     html = ftfy.fix_text(html)
 
+    lxml_tree = get_lxml_tree(html)
+    info["title"] = get_lxml_title(lxml_tree)
     if config["readability"]:
         html = Document(html).summary()
+        lxml_tree = None
+
     html = html_preprocessing(html, config)
     tree = HTMLTree.parse(html)
     replacement_manager = ReplacementManager()
@@ -306,11 +266,11 @@ def extract_text(html, config=DEFAULT_CONFIG):
         tree, info = extract_math(tree, replacement_manager, info)
     tree, info = filter_tree(tree, replacement_manager, config, info)
 
-    lxml_tree = get_lxml_tree(str(tree))
+    lxml_tree = lxml_tree or get_lxml_tree(str(tree))
     if lxml_tree is not None:
-        info["title"] = restore_replacements(
-            get_lxml_title(lxml_tree), replacement_manager, config
-        )
+        # info["title"] = info["title"] or restore_replacements(
+        #     get_lxml_title(lxml_tree), replacement_manager, config
+        # )
         text = CustomInscriptis(
             lxml_tree,
             ParserConfig(css=CSS_PROFILES["strict"], display_images=False),

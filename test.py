@@ -139,5 +139,6 @@ if __name__ == "__main__":
         # print(json.dumps(data, ensure_ascii=False))
         print(data["content"])
     else:
+        configuration["readability"] = True
         a, info = extract_text(html, configuration)
         print(a, info)
