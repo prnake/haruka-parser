@@ -1,5 +1,5 @@
 from haruka_parser.utils import has_style
-from haruka_parser.line_processing import restore_replacements
+from haruka_parser.line_processing import restore_replacements, have_chinese_characters
 from tabulate import tabulate
 from resiliparse.parse.html import DOMCollection
 
@@ -198,7 +198,7 @@ def extract_code(tree, replacement_manager, info):
                 )
 
 
-def extract_tables(node, replacement_manager, config):
+def extract_tables(node, replacement_manager, config, info):
     # Don't worry about tables that have tables in them or have headers
     # tables = node.query_selector_all('table:not(:has(table *))')
     tables = node.query_selector_all("table:not(:has(table))")
@@ -285,6 +285,9 @@ def extract_tables(node, replacement_manager, config):
                     tablefmt="html",
                     headers=headers,
                 )
+                info["table"] += 1
+                if have_chinese_characters(rendered_table):
+                    info["chinese_table"] += 1
                 table.html = replacement_manager.add_replacement(
                     rendered_table, tag="table"
                 )
@@ -304,7 +307,7 @@ def extract_tables(node, replacement_manager, config):
             if table.parent:
                 table.parent.remove_child(table)
 
-    return node
+    return node, info
 
 
 def extract_headings(tree, replacement_manager, markdown_formatting):

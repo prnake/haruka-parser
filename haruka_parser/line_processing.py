@@ -55,6 +55,10 @@ def remove_edit_buttons(lines):
     return output_lines
 
 
+def have_chinese_characters(text):
+    return bool(re.search("[\u4e00-\u9fff]", text))
+
+
 def remove_chinese_characters(lines):
     output_lines = []
     for line in lines:

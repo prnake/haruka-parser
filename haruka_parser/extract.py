@@ -173,7 +173,7 @@ def filter_tree(tree, replacement_manager, config, info):
     remove_dense_links(tree)
 
     # Format tables
-    extract_tables(tree.document, replacement_manager, config)
+    _, info = extract_tables(tree.document, replacement_manager, config, info)
 
     # Process stack exchange separators
     add_se_separators(tree)
@@ -181,7 +181,7 @@ def filter_tree(tree, replacement_manager, config, info):
     # Preprocess main content
     main_content_preprocess(tree)
 
-    return tree
+    return tree, info
 
 
 def replace_tags(html, old, new):
@@ -256,6 +256,8 @@ def extract_text(html, config):
         "x-ck12": 0,
         "texerror": 0,
         "code_block": 0,
+        "table": 0,
+        "chinese_table": 0,
         "title": "",
     }
 
@@ -277,11 +279,13 @@ def extract_text(html, config):
     if config["extract_latex"]:
         math_config = get_math_config(tree.document.html)
         tree, info = extract_math(tree, replacement_manager, info)
-    tree = filter_tree(tree, replacement_manager, config, info)
+    tree, info = filter_tree(tree, replacement_manager, config, info)
 
     lxml_tree = get_lxml_tree(str(tree))
     if lxml_tree is not None:
-        info["title"] = restore_replacements(get_lxml_title(lxml_tree), replacement_manager, config)
+        info["title"] = restore_replacements(
+            get_lxml_title(lxml_tree), replacement_manager, config
+        )
         text = CustomInscriptis(
             lxml_tree,
             ParserConfig(css=CSS_PROFILES["strict"], display_images=False),
