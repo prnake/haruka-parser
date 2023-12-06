@@ -12,7 +12,14 @@ setup(
     author_email="prnake@gmail.com",
     url="https://github.com/prnake/haruka-parser",
     packages=["haruka_parser"],
-    install_requires=["py_asciimath", "inscriptis", "tabulate", "numpy", "resiliparse"],
+    install_requires=[
+        "py_asciimath",
+        "inscriptis",
+        "tabulate",
+        "numpy",
+        "resiliparse",
+        "ftfy",
+    ],
     include_package_data=True,
     classifiers=(
         "Programming Language :: Python :: 3",

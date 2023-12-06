@@ -7,6 +7,7 @@ from inscriptis import ParserConfig
 from inscriptis.css_profiles import CSS_PROFILES
 from inscriptis.html_engine import Inscriptis
 
+import ftfy
 import lxml.html
 from inscriptis.model.canvas import Canvas
 
@@ -263,6 +264,10 @@ def extract_text(html, config):
 
     if not html:
         return "", info
+    
+    # NFCK normalization
+    html = ftfy.fix_text(html)
+
     if config["readability"]:
         html = Document(html).summary()
     html = html_preprocessing(html, config)
