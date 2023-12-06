@@ -29,26 +29,6 @@ e^(i*pi) = -1
 </body>
 </html>"""
 
-configuration = {
-    "readability": False,
-    "skip_large_links": False,
-    "extract_latex": True,
-    "extract_cnki_latex": False,
-    "escape_dollars": True,
-    "remove_buttons": True,
-    "remove_edit_buttons": True,
-    "remove_image_figures": True,
-    "markdown_code": True,
-    "markdown_headings": True,
-    "remove_chinese": False,
-    "boilerplate_config": {
-        "enable": False,
-        "ratio_threshold": 0.18,
-        "absolute_threshold": 10,
-        "end_threshold": 15,
-    },
-}
-
-text, info = extract_text(html, configuration)
+text, info = extract_text(html)
 print(text)
 print(info)

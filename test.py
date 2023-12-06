@@ -1,6 +1,8 @@
-from haruka_parser.extract import extract_text
-from lxml import etree
+import sys
 import json
+from lxml import etree
+from haruka_parser.extract import extract_text
+from haruka_parser.extract import DEFAULT_CONFIG as configuration
 
 
 def get_one(ele, all=False):
@@ -121,27 +123,6 @@ def parse_cnki(detail):
 
 
 if __name__ == "__main__":
-    import sys
-
-    configuration = {
-        "readability": False,
-        "skip_large_links": False,
-        "extract_latex": True,
-        "extract_cnki_latex": False,
-        "escape_dollars": True,
-        "remove_buttons": True,
-        "remove_edit_buttons": True,
-        "remove_image_figures": True,
-        "markdown_code": True,
-        "markdown_headings": True,
-        "remove_chinese": False,
-        "boilerplate_config": {
-            "enable": False,
-            "ratio_threshold": 0.18,
-            "absolute_threshold": 10,
-            "end_threshold": 15,
-        },
-    }
     html = open(sys.argv[1]).read()
     if "cnki" in sys.argv[1]:
         configuration["extract_cnki_latex"] = True

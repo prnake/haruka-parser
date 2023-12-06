@@ -11,6 +11,26 @@ import ftfy
 import lxml.html
 from inscriptis.model.canvas import Canvas
 
+DEFAULT_CONFIG = {
+    "readability": False,
+    "skip_large_links": False,
+    "extract_latex": True,
+    "extract_cnki_latex": False,
+    "escape_dollars": True,
+    "remove_buttons": True,
+    "remove_edit_buttons": True,
+    "remove_image_figures": True,
+    "markdown_code": True,
+    "markdown_headings": True,
+    "remove_chinese": False,
+    "boilerplate_config": {
+        "enable": False,
+        "ratio_threshold": 0.18,
+        "absolute_threshold": 10,
+        "end_threshold": 15,
+    },
+}
+
 
 RE_STRIP_XML_DECLARATION = re.compile(r"^<\?xml [^>]+?\?>")
 
@@ -228,7 +248,7 @@ def html_preprocessing(html, config):
     return html
 
 
-def extract_text(html, config):
+def extract_text(html, config=DEFAULT_CONFIG):
     """Extracts plain text from an HTML string."""
 
     info = {
