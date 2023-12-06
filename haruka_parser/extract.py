@@ -51,7 +51,7 @@ DEFAULT_CONFIG = {
     "remove_buttons": True,
     "remove_edit_buttons": True,
     "remove_image_figures": True,
-    "markdown_code": True,
+    "markdown_code": False,
     "markdown_headings": True,
     "remove_chinese": False,
     "boilerplate_config": {
@@ -136,9 +136,8 @@ def filter_tree(tree, replacement_manager, config, info):
         # Remove any figures that only contain images
         remove_image_figures(tree)
 
-    if config["markdown_code"]:
-        # Wrap the code in markdown code blocks
-        extract_code(tree, replacement_manager, info)
+    # Wrap the code in markdown code blocks
+    info = extract_code(tree, replacement_manager, info, config["markdown_code"])
 
     if config["extract_latex"]:
         remove_jax_ignore(tree)

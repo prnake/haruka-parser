@@ -179,25 +179,29 @@ def remove_link_clusters(tree):
         parent.remove_child(node)
 
 
-def extract_code(tree, replacement_manager, info):
+def extract_code(tree, replacement_manager, info, enable_code=False):
     wp_syntax = tree.document.query_selector_all(".wp_syntax")
     codes = tree.document.query_selector_all("code")
     code_responsive = tree.document.query_selector_all(".code_responsive")
-    pre_tags = tree.document.query_selector_all("pre")
+    pre_tags = []
+    # current disable pre tag due to false positive
+    # pre_tags = tree.document.query_selector_all("pre")
     for code in [*wp_syntax, *codes, *code_responsive, *pre_tags]:
         if replacement_manager.add_replacement("", tag="code") in code.text:
             continue
         multiline = code.text.strip().count("\n") > 0
         if len(code.text) > 0:
             info["code_block"] += 1
-            if multiline:
-                code.text = replacement_manager.add_replacement(
-                    f"```\n{code.text.strip()}\n```", tag="code"
-                )
-            else:
-                code.text = replacement_manager.add_replacement(
-                    f"`{code.text}`", tag="code"
-                )
+            if enable_code:
+                if multiline:
+                    code.text = replacement_manager.add_replacement(
+                        f"```\n{code.text.strip()}\n```", tag="code"
+                    )
+                else:
+                    code.text = replacement_manager.add_replacement(
+                        f"`{code.text}`", tag="code"
+                    )
+    return info
 
 
 def extract_tables(node, replacement_manager, config, info):
@@ -503,7 +507,7 @@ TITLE_CSS_HEURISTICS = [
 
 def get_lxml_title(doc):
     if doc is None:
-        return ''
+        return ""
     title = doc.find(".//title")
     if title is None or title.text is None or len(title.text) == 0:
         return ""
