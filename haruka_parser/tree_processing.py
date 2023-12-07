@@ -4,6 +4,7 @@ from haruka_parser.utils import has_style
 from haruka_parser.line_processing import restore_replacements, have_chinese_characters
 from tabulate import tabulate
 from resiliparse.parse.html import DOMCollection
+from resiliparse.parse.html import HTMLTree
 
 header_to_format = {f"h{i}": f"[heading_{i}]" for i in range(1, 7)}
 
@@ -491,44 +492,42 @@ def add_match(collection, text, orig):
             collection.add(text)
 
 
+# order matters
 TITLE_CSS_HEURISTICS = [
+    "h1",
+    "h2",
+    "h3",
     "#title",
+    ".title",
     "#head",
+    ".head",
     "#heading",
+    ".heading",
     ".pageTitle",
     ".news_title",
-    ".title",
-    ".head",
-    ".heading",
     ".contentheading",
     ".small_header_red",
 ]
 
 
-def get_lxml_title(doc):
+def get_title(doc: HTMLTree) -> str:
     if doc is None:
         return ""
-    title = doc.find(".//title")
-    if title is None or title.text is None or len(title.text) == 0:
-        return ""
-
-    title = orig = norm_title(title.text)
+    title = doc.title.strip()
+    if title:
+        title = orig = norm_title(title)
+    else:
+        orig = ""
 
     candidates = set()
 
-    for item in [".//h1", ".//h2", ".//h3"]:
-        for e in list(doc.iterfind(item)):
-            if e.text:
-                add_match(candidates, e.text, orig)
-            if e.text_content():
-                add_match(candidates, e.text_content(), orig)
-
     for item in TITLE_CSS_HEURISTICS:
-        for e in doc.cssselect(item):
+        for e in doc.body.query_selector_all(item):
             if e.text:
-                add_match(candidates, e.text, orig)
-            if e.text_content():
-                add_match(candidates, e.text_content(), orig)
+                if not orig:
+                    orig = e.text
+                else:
+                    add_match(candidates, e.text, orig)
 
     if candidates:
         title = sorted(candidates, key=len)[-1]
@@ -550,10 +549,10 @@ def get_lxml_title(doc):
                 else:
                     title = orig.split(": ", 1)[1]
 
-    if not 15 < len(title) < 150:
-        return orig
+    if not 5 < len(title) < 150:
+        return orig or ""
 
-    return title
+    return title or ""
 
 
 def get_lxml_tree(html_content):

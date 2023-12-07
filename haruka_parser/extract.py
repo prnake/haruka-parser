@@ -1,8 +1,9 @@
+import os
+import re
+from collections import defaultdict
 from readability import Document
 from resiliparse.parse.html import HTMLTree
 from resiliparse.extract.html2text import extract_plain_text
-import os
-import re
 from inscriptis import ParserConfig
 from inscriptis.css_profiles import CSS_PROFILES
 from inscriptis.html_engine import Inscriptis
@@ -30,7 +31,7 @@ from haruka_parser.tree_processing import (
     remove_display_none,
     main_content_preprocess,
     post_process_headings,
-    get_lxml_title,
+    get_title,
     get_lxml_tree,
 )
 from haruka_parser.line_processing import (
@@ -42,25 +43,29 @@ from haruka_parser.line_processing import (
 )
 from haruka_parser.utils import ReplacementManager
 
-DEFAULT_CONFIG = {
-    "readability": False,
-    "skip_large_links": False,
-    "extract_latex": True,
-    "extract_cnki_latex": False,
-    "escape_dollars": True,
-    "remove_buttons": True,
-    "remove_edit_buttons": True,
-    "remove_image_figures": True,
-    "markdown_code": False,
-    "markdown_headings": True,
-    "remove_chinese": False,
-    "boilerplate_config": {
-        "enable": False,
-        "ratio_threshold": 0.18,
-        "absolute_threshold": 10,
-        "end_threshold": 15,
+DEFAULT_CONFIG = defaultdict(
+    bool,
+    {
+        "add_title": True,
+        "readability": False,
+        "skip_large_links": False,
+        "extract_latex": True,
+        "extract_cnki_latex": False,
+        "escape_dollars": True,
+        "remove_buttons": True,
+        "remove_edit_buttons": True,
+        "remove_image_figures": True,
+        "markdown_code": False,
+        "markdown_headings": True,
+        "remove_chinese": False,
+        "boilerplate_config": {
+            "enable": False,
+            "ratio_threshold": 0.18,
+            "absolute_threshold": 10,
+            "end_threshold": 15,
+        },
     },
-}
+)
 
 
 class CustomInscriptis(Inscriptis):
@@ -243,11 +248,9 @@ def extract_text(html, config=DEFAULT_CONFIG):
     # NFCK normalization
     html = ftfy.fix_text(html)
 
-    lxml_tree = get_lxml_tree(html)
-    info["title"] = get_lxml_title(lxml_tree)
+    info["title"] = get_title(HTMLTree.parse(html))
     if config["readability"]:
         html = Document(html).summary()
-        lxml_tree = None
 
     html = html_preprocessing(html, config)
     tree = HTMLTree.parse(html)
@@ -265,10 +268,10 @@ def extract_text(html, config=DEFAULT_CONFIG):
         tree, info = extract_math(tree, replacement_manager, info)
     tree, info = filter_tree(tree, replacement_manager, config, info)
 
-    lxml_tree = lxml_tree or get_lxml_tree(str(tree))
+    lxml_tree = get_lxml_tree(str(tree))
     if lxml_tree is not None:
         # info["title"] = info["title"] or restore_replacements(
-        #     get_lxml_title(lxml_tree), replacement_manager, config
+        #     get_title(lxml_tree), replacement_manager, config
         # )
         text = CustomInscriptis(
             lxml_tree,
@@ -319,5 +322,12 @@ def extract_text(html, config=DEFAULT_CONFIG):
     text = re.sub(r"\n{3,}", "\n\n", text)
 
     text = text.strip()
+
+    if config["add_title"] and info["title"]:
+        if info["title"] not in "\n".join(text.split("\n")[:3]):
+            if config["markdown_headings"]:
+                text = "# " + info["title"] + "\n\n" + text
+            else:
+                text = info["title"] + "\n\n" + text
 
     return text, info
