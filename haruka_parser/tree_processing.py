@@ -211,7 +211,7 @@ def extract_tables(node, replacement_manager, config, info):
     tables = node.query_selector_all("table:not(:has(table))")
     for table in tables:
         # restore table first in order to handle indent corrently
-        table.html = restore_replacements(table.html, replacement_manager, config)
+        table.html = restore_replacements(table.html, replacement_manager, config, info)
     # if config["table_config"]["format"] == "none":
     #     return
     tables = node.query_selector_all("table:not(:has(table, h1, h2, h3, h4, h5, h6))")

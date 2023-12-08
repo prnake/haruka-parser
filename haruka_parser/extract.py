@@ -317,7 +317,7 @@ def extract_text(html, config=DEFAULT_CONFIG):
         lines = remove_edit_buttons(lines)
         text = "\n".join(lines)
 
-    text = restore_replacements(text, replacement_manager, config)
+    text = restore_replacements(text, replacement_manager, config, info)
     # If there are over two newlines in a row, replace with two
     text = re.sub(r"\n{3,}", "\n\n", text)
 

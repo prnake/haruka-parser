@@ -109,10 +109,10 @@ def remove_headings(text):
     return text
 
 
-def restore_replacements(text, replacement_manager, config):
+def restore_replacements(text, replacement_manager, config, info):
     text = remove_headings(text)
-    if config["extract_latex"] and config["escape_dollars"]:
-        # Escape any dollar signs in the text
+    if config["extract_latex"] and config["escape_dollars"] and info["found_math"]:
+        # Escape any dollar signs in the text if we add some $ for math equations
         text = text.replace("[extract_single_dollar]", "\\$")
     else:
         text = text.replace("[extract_single_dollar]", "$")
