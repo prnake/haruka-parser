@@ -1,7 +1,7 @@
 import os
 import re
 from collections import defaultdict
-from readability import Document
+from haruka_parser.readablity_lxml import Document
 from resiliparse.parse.html import HTMLTree
 from resiliparse.extract.html2text import extract_plain_text
 from inscriptis import ParserConfig

@@ -18,8 +18,7 @@ setup(
         "tabulate",
         "numpy",
         "resiliparse",
-        "ftfy",
-        "readability-lxml",
+        "ftfy"
     ],
     include_package_data=True,
     classifiers=(
