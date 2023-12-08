@@ -18,7 +18,8 @@ setup(
         "tabulate",
         "numpy",
         "resiliparse",
-        "ftfy"
+        "ftfy",
+        "cchardet",
     ],
     include_package_data=True,
     classifiers=(
