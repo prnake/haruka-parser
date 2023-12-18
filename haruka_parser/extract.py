@@ -306,7 +306,7 @@ def extract_text(html, config=DEFAULT_CONFIG):
     lines = remove_empty_headers(lines, replacement_manager)
 
     # Strip lines
-    lines = [line.strip() for line in lines]
+    lines = [line.rstrip() for line in lines]
 
     # Create the final string
     text = "\n".join(lines)
