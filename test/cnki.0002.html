@@ -1,0 +1,3095 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>全文阅读--XML全文阅读--中国知网</title>
+    <link rel="icon" href="/kxreader/favicon.ico" />
+    <link rel="shortcut Icon" href="/kxreader/favicon.ico" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="文献 XML KBASE CNKI 中国知网" />
+    <meta name="description" content="XML文献检索" />
+    <link href="/kxreader/Content/css/detail?v=CuqSR_5Jgq-fd5IrzC94-_2e7H2LagBywQcaCXpCClE1" rel="stylesheet"/>
+
+    <script type="text/javascript">
+        var APPPATH = '/kxreader';
+    </script>
+</head>
+
+<body>
+    <div id="mainBody">
+    
+
+
+
+<script defer id="toploginstruct" src="//login.cnki.net/toploginnew/scripts/top.js" data="style=1&amp;platform=KXReader&amp;placeid=mainBody&amp;returnurl=%2f%2fkns.cnki.net%2fKXReader%2fDetail%3finvoice%3dPyXwwLN8Og%252BBTXEgBXw1sPNjuS7x7XGPpak5FFY77gWaDflta8sbEobIi0Zw0MF6S3cN4d2ocQGmkCzm1rBfOzs%252FEc1NgBuPlmOSRZFewBBe2XHdh3AP%252BX6dOTJIeutR486UiXNoGT7S5zeaUuQFn30pFiQ0QG53iYR2seFMhxU%253D%26DBCODE%3dCJFQ%26FileName%3dZZLL202106002%26TABLEName%3dcjfdlast2022%26nonce%3d8CC892C0B0974E0A96AE8262082C9F25%26TIMESTAMP%3d1702024853291%26uid%3d%26PlatForm%3dkdoc"></script>
+<script type="text/javascript" src="https://picx.cnki.net/kxreader/jquery-1.11.3.min.js"></script>
+
+
+
+<div id="headerBox" class="header">
+    <div class="topbar">
+        <div class="textalign">
+            <a v-on:click="switchFormats('icon1')" :href=textAlignUrl>
+                <i class="icon-cen active" title="居中对齐"></i>
+            </a>
+            <a v-on:click="switchFormats('icon2')" :href=textAlignUrl>
+                <i class="icon-left " title="左对齐"></i>
+            </a>
+        </div>
+        <h6 class="free-tip"><i class="icon"></i>HTML阅读开放试用阶段，欢迎体验！</h6>
+    </div>
+    <div class="Logo">
+        <a href="//www.cnki.net">
+            <img src="/kxreader/Content/images/logo.gif" alt="中国知网">
+            <img class="logohome" src="/kxreader/Content/images/home.gif">
+        </a>
+    </div>
+</div>
+
+
+
+<div id="dictTransion" style="display:none">
+    <!-- 词典百科 -->
+    <div class="wrapper textBox" v-bind:style="{textleft:textLeft,textTop:textTop}" v-cloak>
+        <div class="dic-enc-container" v-if="hasResult">
+            <div class="dict-title">
+                <div v-if="dicEncType === 'encyclopedias'">
+                    <span>知网百科</span>
+                    <a v-on:click="openMore('encyclopedias')"
+                       sensors-data='{"event_id":"READ_context_pedia_more","event_secondary_id":"READ_pedia"}' hotrep>查看更多学术释义</a>
+                </div>
+                <div v-else-if="dicEncType === 'dictionary'">
+                    <span>知网词典</span>
+                    <a v-on:click="openMore('dictionary')"
+                       sensors-data='{"event_id":"READ_context_dict_more","event_secondary_id":"READ_dict"}' hotrep>查看更多学术译名</a>
+                </div>
+                <div v-else>
+                    <span>汉语百科</span>
+                    <a v-on:click="openMore('dictionary')" class="hanyuclass"
+                       sensors-data='{"event_id":"READ_context_dict_more","event_secondary_id":"READ_dict"}' hotrep>查看更多</a>
+                </div>
+            </div>
+            <div class="divBack">
+              <ul class="list-container">
+                <!-- 百科条目 -->
+                <template v-if="dicEncType==='encyclopedias'">
+                    <li class="list-item" v-for="(bkItem, index) in bkResultData" :key="index"
+                        sensors-data='{"event_id":"READ_context_pedia_item","event_secondary_id":"READ_pedia"}' hotrep
+                        v-on:click="openUrl(bkItem.url)">
+                        <p class="item-title ellisps">{{bkItem.xkname}}</p>
+                        <p v-if="bkItem.headword" class="item-huaci"><span>{{huaciResultText(bkItem.headword)}}</span> {{pinyinResultText(bkItem.pron)}}</p>
+                        <p v-if="bkItem.translation" class="ellisps-common ellisps-line3 color999">{{bkItem.translation}}</p>
+                        <p v-if="bkItem.snapshot" class="explicate ellisps-common" v-bind:class="hasChinese(bkItem.snapshot) ? 'ellisps-line4':'ellisps-line6'" v-html="bkItem.snapshot"></p>
+                    </li>
+                </template>
+                <!-- 词典条目 -->
+                <template v-if="dicEncType==='dictionary'">
+                    <li class="list-cditem" v-for="(cdItem, cdKey) in dictResultData" :key="cdKey"
+                        sensors-data='{"event_id":"READ_context_dict_item","event_secondary_id":"READ_dict"}' hotrep
+                        v-on:click="openUrl(cdItem.url)">
+                        <p class="item-title cd-name ellisps">{{cdItem.dictname}}</p>
+                        <p v-if="cdItem.headword" class="item-huaci"><span>{{huaciResultText(cdItem.headword)}}</span></p>
+                        <template v-if="cdItem.snapshot">
+                            <p v-if="cdItem.snapshot.indexOf('④......')===-1" class="explicate ellisps-common" v-bind:class="hasChinese(cdItem.snapshot) ? 'ellisps-line4':'ellisps-line6'" v-html="cdItem.snapshot"></p>
+                            <p class="explicate" v-else>{{cdItem.snapshot.slice(0, -7)}}<span>④......</span></p>
+                        </template>
+                        <p v-if="cdItem.discript" class="more-subject color999 ellisps">{{cdItem.discript}}</p>
+                    </li>
+                </template>
+                <template v-else>
+                    <li class="list-cditem" v-for="(zhItem, cdKey) in zhResultData" :key="cdKey"
+                        sensors-data='{"event_id":"READ_context_dict_item","event_secondary_id":"READ_zh"}' hotrep
+                        v-on:click="openUrl(zhItem.url)">
+                        
+                        <p v-if="zhItem.headword" class="item-huaci"><span>{{huaciResultText(zhItem.headword)}}</span></p>
+                        <template v-if="zhItem.snapshot">
+                            <p v-if="zhItem.snapshot.indexOf('④......')===-1" class="explicate ellisps-common" v-bind:class="hasChinese(zhItem.snapshot) ? 'ellisps-line4':'ellisps-line6'" v-html="zhItem.snapshot"></p>
+                            <p class="explicate" v-else>{{zhItem.snapshot.slice(0, -7)}}<span>④......</span></p>
+                        </template>
+                        <p v-if="zhItem.discript" class="more-subject color999 ellisps">{{zhItem.discript}}</p>
+                    </li>
+                </template>
+              </ul>
+            </div>
+            <div class="divBtn" v-if="dicEncType==='encyclopedias'">
+                <input type="text" maxlength="32" v-on:keyup.enter="searchEnterFun('encyclopedias')" placeholder="查询学术释义" ref="searchWord" class="search-input isResourceVisible" />
+                <a href="javascript:;" class="search-btn" v-on:click="searchBtn('encyclopedias')"><svg aria-hidden="true" class="icon"><use xlink:href="#icon-search"></use></svg></a>
+            </div>
+            <div class="divBtn" v-else-if="dicEncType==='dictionary'">
+                <input type="text" maxlength="32" v-on:keyup.enter="searchEnterFun('dictionary')" placeholder="查询学术译名" ref="searchWord" class="search-input isResourceVisible" />
+                <a href="javascript:;" class="search-btn" v-on:click="searchBtn('dictionary')"><svg aria-hidden="true" class="icon"><use xlink:href="#icon-search"></use></svg></a>
+            </div>
+            <div class="divBtn" v-else>
+                <input type="text" maxlength="32" v-on:keyup.enter="searchEnterFun('dictionary')" placeholder="查询汉语字词语句" ref="searchWord" class="search-input isResourceVisible" />
+                <a href="javascript:;" class="search-btn" v-on:click="searchBtn('zh')"><svg aria-hidden="true" class="icon"><use xlink:href="#icon-search"></use></svg></a>
+            </div>
+        </div>
+        <div class="other-result" v-else>
+            <div class="loading" v-if="!hasResult&&isLoading">
+                查询中，请稍候......
+            </div>
+            <div class="fuzzyQuery" v-else-if="!hasResult&&!isLoading&fuzzyQuery">
+                <img class="fuzzyQueryImg" src="https://kns.cnki.net/kxreader/Content/images/RetrievalEmpty.png" />
+                <div class="fuzzyQueryList" v-if="dicEncType==='encyclopedias'">未查到结果，请点击“<a v-on:click="openMore('encyclopedias')" :sensors-data="shiyiSensorsData[dicEncType]" hotrep target="_blank">释义搜索</a>”进行查询</div>
+                <div class="fuzzyQueryList" v-else-if="dicEncType==='dictionary'">未查到结果，请点击“<a v-on:click="openMore('dictionary')" :sensors-data="shiyiSensorsData[dicEncType]" hotrep target="_blank">释义搜索</a>”进行查询</div>
+                <div class="fuzzyQueryList" v-else>未查到结果，请点击“<a v-on:click="openMore('dictionary')" :sensors-data="shiyiSensorsData[dicEncType]" hotrep target="_blank">释义搜索</a>”进行查询</div>
+                <div class="otherResultList">
+                    <div class="otherResult">看看其他结果</div>
+                    <div class="everyData" v-on:click="openUrl(oRItem.url)" v-for="(oRItem, index) in otherResultList" :key="index">
+                        <span class="everyDataSpan" v-html="oRItem.headword"></span>
+                    </div>
+                </div>
+            </div>
+            <div v-else="!hasResult&&!isLoading&emptyQuery">
+                <img class="fuzzyQueryImg" src="https://kns.cnki.net/kxreader/Content/images/RetrievalEmpty.png" />
+                <div class="mptyQuery" v-if="dicEncType==='encyclopedias'">未查到结果，请点击“<a v-on:click="openMore('encyclopedias')" :sensors-data="shiyiSensorsData[dicEncType]" hotrep target="_blank">释义搜索</a>”进行查询</div>
+                <div class="mptyQuery" v-else-if="dicEncType==='dictionary'">未查到结果，请点击“<a v-on:click="openMore('dictionary')" :sensors-data="shiyiSensorsData[dicEncType]" hotrep target="_blank">释义搜索</a>”进行查询</div>
+                <div class="mptyQuery" v-else>未查到结果，请点击“<a v-on:click="openMore('dictionary')" :sensors-data="shiyiSensorsData[dicEncType]" hotrep target="_blank">释义搜索</a>”进行查询</div>
+            </div>
+            <div class="divBtn" v-if="dicEncType==='encyclopedias'">
+                <input type="text" maxlength="32" v-on:keyup.enter="searchEnterFun('encyclopedias')" placeholder="查询学术释义" ref="searchWord" class="search-input isResourceVisible" />
+                <a href="javascript:;" class="search-btn" v-on:click="searchBtn('encyclopedias')"><svg aria-hidden="true" class="icon"><use xlink:href="#icon-search"></use></svg></a>
+            </div>
+            <div class="divBtn" v-else-if="dicEncType==='dictionary'">
+                <input type="text" maxlength="32" v-on:keyup.enter="searchEnterFun('dictionary')" placeholder="查询学术译名" ref="searchWord" class="search-input isResourceVisible" />
+                <a href="javascript:;" class="search-btn" v-on:click="searchBtn('dictionary')"><svg aria-hidden="true" class="icon"><use xlink:href="#icon-search"></use></svg></a>
+            </div>
+            <div class="divBtn" v-else>
+                <input type="text" maxlength="32" v-on:keyup.enter="searchEnterFun('dictionary')" placeholder="查询汉语字词语句" ref="searchWord" class="search-input isResourceVisible" />
+                <a href="javascript:;" class="search-btn" v-on:click="searchBtn('zh')"><svg aria-hidden="true" class="icon"><use xlink:href="#icon-search"></use></svg></a>
+            </div>
+            <div class="queryFailClass" v-on:click="refreshBtn()" v-else-if="!hasResult&&!isLoading&queryFails">数据加载异常，请点击<span id="trySearch">重试</span></div>
+        </div>
+    </div>
+</div>
+
+<script src="/kxreader/Scripts/vue.js" type="text/javascript"></script>
+<script >
+    //猫头鹰
+    var baseheaderBox = new Vue({
+        el: "#headerBox",
+        data: {
+            textAlignUrl: '',
+
+            originUrlone: "/kxreader/Detail?dbcode=CJFQ&amp;filename=ZZLL202106002&amp;align=md;",
+
+            originUrlTwo: "/kxreader/Detail?dbcode=CJFQ&amp;filename=ZZLL202106002&amp;align=lt",
+
+
+            originTestUrlOne: '',
+            originTestUrlTwo: ''
+        },
+        created: function () {
+            this.originTestUrlOne = this.originUrlone.replace(/amp;/ig, "");
+            this.originTestUrlTwo = this.originUrlTwo.replace(/amp;/ig, "");
+        },
+        methods: {
+            // 切换模式的时候
+            switchFormats:function(type) {
+                if (type == 'icon1') {
+                    this.textAlignUrl =  this.originTestUrlOne;
+                    localStorage.setItem("locationHash", '123');
+                    this.LoadCss('../KXReader/Content/css/detail.css');
+                    localStorage.setItem("alignmentStyle", "centerStyle");
+                } else if (type == 'icon2') {
+                    this.textAlignUrl =  this.originTestUrlTwo;
+                    localStorage.setItem("locationHash", '456');
+                    this.LoadCss('../KXReader/Content/css/ldetail.css');
+                    if (window.DBcode == 'CYFD') {
+                        localStorage.setItem("alignmentStyle", "leftStyle");
+                    }
+                    //this.loadCss("https://login.cnki.net/toploginnew/scripts/top.js");
+                }
+
+            },
+
+            //css加載原生css文件
+            LoadCss: function (path){
+                var head = document.getElementsByTagName('head')[0];
+                var link = document.createElement('link');
+                link.href = path;
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                head.appendChild(link);
+            },
+         }
+    });
+
+
+    //百科 词典 汉语词典  加载页面
+    var dictionaryTranslation = new Vue({
+        el: "#dictTransion",
+        data: {
+            hasResult: false,
+            isLoading: false,
+            textBoxShow: false,
+            dicEncType: "",
+            //百科&词典弹层的位置数据
+            textLeft: "",
+            textTop: "",
+            cdName: {
+                "DICT_V3_TERM": '学科词典',
+                "DICT_V3_ABBR": '缩略语',
+                "DICT_V3_M_RM": '人名',
+                "DICT_V3_M_DM": '地名',
+                "DICT_V3_M_ZW": '植物',
+                "DICT_V3_YW_EN_ZH": '英汉',
+                "DICT_V3_YW_ZH_EN": '汉英',
+                "ECPD_BASE": '百科'
+            },
+            bkResultData: [],
+            dictResultData: [],
+            zhResultData: [],
+            text: "",
+            shiyiSensorsData: {
+                'encyclopedias': '{"event_id":"READ_context_pedia_search","event_secondary_id":"READ_pedia"}',
+                'dictionary': '{"event_id":"READ_context_dict_search","event_secondary_id":"READ_dict"}'
+            },
+            //203页面
+            fuzzyQuery: false,
+            otherResultList: [],
+            //400页面
+            emptyQuery: false,
+            //查询失败，请刷新
+            queryFails: false,
+            searchword: ""
+        },
+        created: function () { },
+        computed: {
+            shiyiUrl: function () {
+                if (!this.hasResult) {
+                    if (this.dicEncType === 'encyclopedias') {
+                        console.log(window.Text)
+                        return "https://baike.cnki.net/#/result?kw=" + encodeURIComponent(window.Text) + "&option=0"
+                    } else {
+                        return "https://cidian.cnki.net/urtpweb/result?sysid=112&s=vs1&f=vs1&v=" + encodeURIComponent(window.Text)
+                    }
+                }
+            }
+        },
+        methods: {
+            openUrl: function (url) {
+                window.open(url);
+            },
+
+            huaciResultText: function (val) {
+                if (this.hasChinese(val)) {
+                    return val.length > 10 ? val.substr(0, 10) + '...' : val;
+                } else {
+                    return val.length > 20 ? val.substr(0, 20) + '...' : val;
+                }
+            },
+           
+            hasChinese: function (val) {
+                var reg = new RegExp("[\\u4E00-\\u9FFF]+", "g");
+                return reg.test(val);
+            },
+
+            pinyinResultText: function (val) {
+                var pinyinArr = val.split(' ');
+                return pinyinArr.length > 10 ? pinyinArr.slice(0, 10).join(' ') + '...' : val;
+            },
+
+            
+            searchBtn: function (evt) {
+                var _this = this;
+                _this.searchword = _this.$refs.searchWord.value
+                if (_this.searchword == "") {
+                    if (evt === 'encyclopedias') {
+                        window.open("https://baike.cnki.net/#/result?kw=" + encodeURIComponent(window.Text) + "&option=0");
+                    } else {
+                        //汉语和词典跳转的链接一致
+                        window.open("https://cidian.cnki.net/urtpweb/result?sysid=112&s=vs1&f=vs1&v=" + encodeURIComponent(window.Text));
+                    }
+                } else {
+                    if (evt === 'encyclopedias') {
+                        window.open("https://baike.cnki.net/#/result?kw=" + _this.searchword + "&option=0");
+                    } else {
+                        //汉语和词典跳转的链接一致
+                        window.open("https://cidian.cnki.net/urtpweb/result?sysid=112&s=vs1&f=vs1&v=" + _this.searchword);
+                    }
+                }
+            },
+
+            openMore: function (evt) {
+                if (evt === 'encyclopedias') {
+                    window.open("https://baike.cnki.net/#/result?kw=" + encodeURIComponent(window.Text) +"&option=0");
+                } else {
+                    //汉语和词典跳转的链接一致
+                    window.open("https://cidian.cnki.net/urtpweb/result?sysid=112&s=vs1&f=vs1&v=" + encodeURIComponent(window.Text));
+                }
+            },
+
+            refreshBtn: function () {
+                var _this = this;
+                _this.encOrDicSearch(_this.dicEncType);
+            },
+
+            searchEnterFun: function (evt) {
+                var _this = this;
+                var searchText = _this.$refs.searchWord.value;
+                if (!!searchText) {
+                    if (evt === 'encyclopedias') {
+                        window.open("https://baike.cnki.net/#/result?kw=" + searchText + "&option=0");
+                    } else {
+                        //汉语和词典跳转的链接一致
+                        window.open("https://cidian.cnki.net/urtpweb/result?sysid=112&s=vs1&f=vs1&v=" + searchText);
+                    }
+                } else {
+                    if (evt === 'encyclopedias') {
+                        window.open("https://baike.cnki.net/#/result?kw=" + encodeURIComponent(window.Text) + "&option=0");
+                    } else {
+                        //汉语和词典跳转的链接一致
+                        window.open("https://cidian.cnki.net/urtpweb/result?sysid=112&s=vs1&f=vs1&v=" + encodeURIComponent(window.Text));
+                    }
+                }
+            },
+            //计算词典弹层的位置
+            showDictionaryBox: function () {
+                var _this = this;
+                $("#dictTransion").css("display", "block");
+                var evt = window.mouseupPositon;
+                evt = (evt) ? evt : ((window.event) ? window.event : "");
+                evt = (evt) ? evt : ((window.event) ? window.event : "");
+                var obj = $(".textBox");
+                var sDivWidth = 88; //检索框“Google搜索”的宽度
+                // 选择了文本，显示 复制 和 搜索 按钮
+                var windowWidth; //窗口的宽
+                //取得窗口的宽
+                if (self.innerWidth) {
+                    windowWidth = self.innerWidth;
+                } else if (document.documentElement && document.documentElement.clientWidth) {
+                    windowWidth = document.documentElement.clientWidth;
+                } else if (document.body) {
+                    windowWidth = document.body.clientWidth;
+                }
+
+                var rX, rX, wT;
+                //ie6 ie7
+                if (!$.support.leadingWhitespace) {
+                    wT = (evt.clientX + sDivWidth + obj.outerWidth(true)) - windowWidth;
+                    rY = document.documentElement.scrollTop + evt.clientY;
+                    rX = document.documentElement.scrollLeft + evt.clientX;
+                    //rY = (evt.clientY < 25) ? rY + 10 : rY + 25;
+                    rY = (evt.clientY + obj.outerHeight(true) < $(window).height()) ? rY + 20 : rY - obj.outerHeight(true) - 20;
+                    rX = (wT > 0) ? rX - obj.outerWidth(true) : rX - 10;
+                }
+                else {
+                    var sT = (document.documentElement.scrollTop > 0) ? document.documentElement.scrollTop : document.body.scrollTop;
+                    wT = (evt.pageX + sDivWidth + obj.outerWidth(true)) - windowWidth;
+                    //rY = ((evt.pageY - sT) < 25) ? evt.pageY + 10 : evt.pageY + 15;
+                    rY = (evt.pageY - sT + obj.outerHeight(true) < $(window).height()) ? evt.pageY + 20 : evt.pageY - obj.outerHeight(true) - 20;
+                    rX = (wT > 0) ? evt.pageX - obj.outerWidth(true) : evt.pageX - 10;
+                }
+                obj.css("top", rY);
+                obj.css("left", rX);
+                obj.css("z-index", 20000);
+                ////清空input框的内部值
+                //_this.$refs.searchWord.value = "";
+                /*dictionaryTranslation.textBoxShow = true;*/
+                // GLS.Text = str;
+            },
+
+            encOrDicSearch: function (type) {
+                debugger
+                var _this = this;
+                /*判定网络延迟*/
+                $("#GLSearch").hide();
+                var start = new Date().getTime();
+                _this.dicEncType = type;
+                _this.dictResultData = [];
+                _this.bkResultData = [];
+                _this.zhResultData = [];
+                _this.otherResultList = [];
+                if (window.Text.length > 100) {
+                    layer.msg("字符数超过上限", {
+                        skin: "layui-layer tip-red"
+                    });
+                    return;
+                }
+                //去掉前后的空格
+                var searchText = window.Text.replace(/^\s+|\s+$/g, "");
+                if (type == 'dictionary') {
+                    $.ajax({
+                        //请求方式
+                        type: "POST",
+                        //请求的媒体类型
+                        contentType: "application/x-www-form-urlencoded",
+                        async: true,
+                        //dataType: "json",
+                        data: { "plat": "NZKPT", "size": "3", "stype": "dict", "title": searchText, "&timestamp": new Date().getTime()},
+                        //请求地址
+                        url: "https://kbsi.cnki.net/api/skdeSearch/dict/gethdwk",
+                        cache: false,
+                        crossDomain: true == !(document.all),
+                        //数据，json字符串
+                        //请求成功
+                        beforeSend: function () {
+                            //未加载出来数据，loading
+                            _this.hasResult = false;
+                            _this.isLoading = true;
+                            _this.showDictionaryBox();
+                            var lagTime = new Date().getTime() - start;
+                            if (lagTime > 4000) {
+                                _this.queryFails = true;
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.showDictionaryBox();
+                                console.log('lagTime', lagTime);
+                                return
+                            }
+                        },
+                        success: function (result) {
+                            var lag = new Date().getTime() - start;
+                            console.log('lag', lag);
+                            //如果网络延迟就返回，加载失败
+                            if (lag > 3000) {
+                                _this.queryFails = true;
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.showDictionaryBox();
+                                return
+                            }
+                            if (result.code == 200 || result.code == 202) {
+                                for (var i = 0; i < Object.getOwnPropertyNames(_this.cdName).length - 1; i++) {
+                                    var dictKey = Object.getOwnPropertyNames(_this.cdName)[i];
+                                    if (!!result.dataList[0][dictKey]) {
+                                        for (var j = 0; j < result.dataList[0][dictKey].length; j++) {
+                                            _this.dictResultData.push(result.dataList[0][dictKey][j]);
+                                        }
+                                    }
+                                }
+
+                                //限定字典的长度为7
+                                if (_this.dictResultData.length > 7) {
+                                    _this.dictResultData.slice(0, 7)
+                                }
+
+                                if (_this.dictResultData == null || _this.dictResultData.length === 0) {
+                                    _this.hasResult = false;
+                                    _this.isLoading = false;
+                                    return;
+                                }
+                                _this.showDictionaryBox();
+                                _this.hasResult = true;
+                            } else if (result.code == 203) {
+                                for (var i = 0; i < Object.getOwnPropertyNames(_this.cdName).length - 1; i++) {
+                                    var dictKey = Object.getOwnPropertyNames(_this.cdName)[i];
+                                    if (!!result.dataList[0][dictKey]) {
+                                        for (j = 0; j < result.dataList[0][dictKey].length; j++) {
+                                            _this.otherResultList.push(result.dataList[0][dictKey][j]);
+                                        }
+                                    }
+                                }
+                                _this.showDictionaryBox();
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.fuzzyQuery = true;
+                                _this.emptyQuery = false;
+                            } else if (result.code == 400) {
+                                _this.showDictionaryBox();
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.emptyQuery = true;
+                                _this.fuzzyQuery = false;
+                            }
+
+                        },
+                        //请求失败，包含具体的错误信息
+                        error: function (e) {
+                        }
+
+                    });
+                }
+                else if (type == 'encyclopedias') {
+                    $.ajax({
+                        //请求方式
+                        type: "POST",
+                        //请求的媒体类型
+                        contentType: "application/x-www-form-urlencoded",
+                        async: true,
+                        //dataType: "json",
+                        data: { "plat": "NZKPT", "size": "3", "stype": "bk", "title": searchText, "&timestamp": new Date().getTime() },
+                        //请求地址
+                        url: "https://kbsi.cnki.net/api/skdeSearch/dict/gethdwk",
+                        cache: false,
+                        crossDomain: true == !(document.all),
+                        //数据，json字符串
+                        //请求成功
+                        beforeSend: function () {
+                            //未加载出来数据，loading
+                            _this.hasResult = false;
+                            _this.isLoading = true;
+                            _this.showDictionaryBox();
+                        },
+                        success: function (result) {
+                            debugger
+                            var lag = new Date().getTime() - start;
+                            //如果网络延迟就返回，加载失败
+                            if (lag > 3000) {
+                                _this.showDictionaryBox();
+                                _this.queryFails = true;
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                //return
+                            }
+                            if (result.code == 200 || result.code == 202) {
+                                _this.bkResultData = result.dataList[0].ECPD_BASE;
+                                _this.showDictionaryBox();
+                                _this.hasResult = true;
+                                if (_this.bkResultData == null || _this.bkResultData.length === 0) {
+                                    _this.hasResult = false;
+                                    _this.isLoading = false;
+                                    return;
+                                }
+                            } else if (result.code == 203) {
+                                if (JSON.stringify(result.dataList) === "[{}]") {
+                                    _this.showDictionaryBox();
+                                    _this.hasResult = false;
+                                    _this.isLoading = false;
+                                    _this.emptyQuery = true;
+                                    _this.fuzzyQuery = false;
+                                    return;
+                                }
+                                _this.otherResultList = result.dataList[0].ECPD_BASE;
+                                _this.showDictionaryBox();
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.fuzzyQuery = true;
+                                _this.emptyQuery = false;
+                            } else if (result.code == 400) {
+                                _this.showDictionaryBox();
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.emptyQuery = true;
+                                _this.fuzzyQuery = false;
+                            }
+                        },
+                        //请求失败，包含具体的错误信息
+                        error: function (e) {
+                            _this.showDictionaryBox();
+                            _this.hasResult = false;
+                            _this.isLoading = false;
+                            _this.fuzzyQuery = false;
+                        }
+
+                    });
+                } else {
+                    $.ajax({
+                        //请求方式
+                        type: "POST",
+                        //请求的媒体类型
+                        contentType: "application/x-www-form-urlencoded",
+                        async: true,
+                        //dataType: "json",
+                        data: { "plat": "NZKPT", "size": "3", "stype": "zh", "title": searchText, "&timestamp": new Date().getTime() },
+                        //请求地址
+                        url: "https://kbsi.cnki.net/api/skdeSearch/dict/gethdwk",
+                        cache: false,
+                        crossDomain: true == !(document.all),
+                        //数据，json字符串
+                        //请求成功
+                        beforeSend: function () {
+                            //未加载出来数据，loading
+                            _this.hasResult = false;
+                            _this.isLoading = true;
+                            _this.showDictionaryBox();
+                        },
+                        success: function (result) {
+                            var lag = new Date().getTime() - start;
+                            //如果网络延迟就返回，加载失败
+                            if (lag > 3000) {
+                                _this.showDictionaryBox();
+                                _this.queryFails = true;
+                                _this.queryFails = true;
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                return
+                            }
+                            if (result.code == 200 || result.code == 202) {
+                                _this.zhResultData = result.dataList[0].DICT_V3_YW_ZH;
+                                _this.showDictionaryBox();
+                                _this.hasResult = true;
+                                if (_this.zhResultData == null || _this.zhResultData.length === 0) {
+                                    _this.hasResult = false;
+                                    _this.isLoading = false;
+                                    return;
+                                }
+                            } else if (result.code == 203) {
+                                _this.otherResultList = result.dataList[0].DICT_V3_YW_ZH;
+                                _this.showDictionaryBox();
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.fuzzyQuery = true;
+                                _this.emptyQuery = false;
+                            } else if (result.code == 400) {
+                                _this.showDictionaryBox();
+                                _this.hasResult = false;
+                                _this.isLoading = false;
+                                _this.emptyQuery = true;
+                                _this.fuzzyQuery = false;
+                            }
+                        },
+
+                        //请求失败，包含具体的错误信息
+                        error: function (e) {
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+</script>
+
+
+
+
+    
+
+
+
+<div class="btn-link" style="display: none"><a target="_blank" href="/kcms/detail/detail.aspx?dbcode=CJFQ&amp;filename=ZZLL202106002&amp;v=MTQ0NDRSN21lWmVkdUZ5cmhWcjNNUHpmSFlyRzRITkRNcVk5RlpvUUtESDg0dlI0VDZqNTRPM3pxcUJ0R0ZyQ1U=&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">知网节</a></div>
+
+    <div class="main">
+
+        
+
+    <div class="sidebar-a">
+        <!--sidebar start-->
+        <div class="sidenav">
+            <div class="arrow"><span></span></div>
+            <!--sidebar_list start-->
+            <dl class="sidenav-list">
+                        <dt class="tit">目录结构</dt>
+                            <dd class="guide">
+                                    <p><a href="#199" data-title="&lt;b&gt;1&lt;/b&gt; 材料与方法 "><b>1</b> 材料与方法</a><i></i></p>
+                                                                    <ul class="contentbox">
+                                                <li><a href="#200" data-title="1.1 试剂和仪器">1.1 试剂和仪器</a></li>
+                                                <li><a href="#203" data-title="1.2 细胞培养">1.2 细胞培养</a></li>
+                                                <li><a href="#205" data-title="1.3 PRLR的筛选">1.3 PRLR的筛选</a></li>
+                                                <li><a href="#207" data-title="1.4 患者的生存分析">1.4 患者的生存分析</a></li>
+                                                <li><a href="#209" data-title="1.5 实时荧光定量PCR检测">1.5 实时荧光定量PCR检测</a></li>
+                                                <li><a href="#212" data-title="1.6 蛋白质印迹法检测">1.6 蛋白质印迹法检测</a></li>
+                                                <li><a href="#214" data-title="1.7 免疫组织化学检测">1.7 免疫组织化学检测</a></li>
+                                                <li><a href="#216" data-title="1.8 基因集富集分析(Gene Set Enrichment analysis，GSEA)与共表达分析">1.8 基因集富集分析(Gene Set Enrichment analysis，GSEA)与共表达......</a></li>
+                                                <li><a href="#219" data-title="1.9 采用shRNA干扰技术沉默PANC-1和SW-1990细胞中PRLR的表达">1.9 采用shRNA干扰技术沉默PANC-1和SW-1990细胞中PRLR的表达</a></li>
+                                                <li><a href="#221" data-title="1.10 CCK-8法检测沉默PRLR表达对PANC-1和SW-1900细胞耐药性的影响">1.10 CCK-8法检测沉默PRLR表达对PANC-1和SW-1900细胞耐药性的影响</a></li>
+                                                <li><a href="#224" data-title="1.11 细胞凋亡检测。">1.11 细胞凋亡检测。</a></li>
+                                                <li><a href="#226" data-title="1.12 统计学方法">1.12 统计学方法</a></li>
+                                    </ul>
+                            </dd>
+                            <dd class="guide">
+                                    <p><a href="#228" data-title="&lt;b&gt;2&lt;/b&gt; 结 果 "><b>2</b> 结 果</a><i></i></p>
+                                                                    <ul class="contentbox">
+                                                <li><a href="#229" data-title="2.1 PRLR在PDAC组织及细胞中的表达情况">2.1 PRLR在PDAC组织及细胞中的表达情况</a></li>
+                                                <li><a href="#236" data-title="2.2 PRLR低表达与胰腺癌细胞耐药性相关">2.2 PRLR低表达与胰腺癌细胞耐药性相关</a></li>
+                                                <li><a href="#240" data-title="2.3 PRLR表达量的下调可提高PDAC细胞的IC50值并抑制其凋亡率">2.3 PRLR表达量的下调可提高PDAC细胞的IC50值并抑制其凋亡率</a></li>
+                                                <li><a href="#246" data-title="2.4 下调PRLR表达提高PDAC细胞中G6PD和TKT的表达量">2.4 下调PRLR表达提高PDAC细胞中G6PD和TKT的表达量</a></li>
+                                    </ul>
+                            </dd>
+                            <dd class="guide">
+                                    <p><a href="#249" data-title="&lt;b&gt;3&lt;/b&gt; 讨 论 "><b>3</b> 讨 论</a><i></i></p>
+                                                            </dd>
+                            <dd class="guide">
+                                    <p><a href="#" data-title="文内图表 ">文内图表</a><i></i></p>
+                                                                    <ul class="contentbox">
+                                                <li><a href="#254" data-title="图1 采用GEO和TCGA数据库分析显示PRLR在PDAC组织中低表达且与患者的不良预后相关">图1 采用GEO和TCGA数据库分析显示PRLR在PDAC组织中低表达且与患者的不良预后相关</a></li>
+                                                <li><a href="#255" data-title="图2 分别采用实时荧光定量PCR法(A)、蛋白质印迹法(B)和免疫组织化学法(C)检测PRLR mRNA和蛋白在PDAC细胞以及肿瘤组织中的表达水平">图2 分别采用实时荧光定量PCR法(A)、蛋白质印迹法(B)和免疫组织化学法(C)检测PRLR mRNA和蛋白在PDAC细胞以及肿瘤组织中的表达水平</a></li>
+                                                <li><a href="#256" data-title="图3PRLR低表达与PDAC细胞耐药性相关">图3PRLR低表达与PDAC细胞耐药性相关</a></li>
+                                                <li><a href="#332" data-title="图4 下调PRLR表达对PANC-1和SW-1990细胞IC50值和凋亡率的影响">图4 下调PRLR表达对PANC-1和SW-1990细胞IC50值和凋亡率的影响</a></li>
+                                                <li><a href="#258" data-title="图5 采用TCGA数据分析PRLR与TKT和G6PD mRNA表达的相关相关性(A)以及敲低PRLR表达对PDAC细胞中G6PD和TKT mRNA和蛋白表达水平的影响(B)">图5 采用TCGA数据分析PRLR与TKT和G6PD mRNA表达的相关相关性(A)以及敲低PRLR表达对PDAC细胞中G6PD和TKT mRNA和蛋白表达水平的影响(B)</a></li>
+                                    </ul>
+                            </dd>
+                                    <dd class="guide">
+                                        <h6>
+                                            <p><a href="#a_bibliography">参考文献</a> </p>
+                                        </h6>
+                                    </dd>
+            </dl>
+        </div>
+        <!--sidebar end-->
+        &nbsp;
+        <!--此处有一空格符 勿删-->
+    </div>
+
+                <div class="sidebar-b three-collumn" style="width:0;">
+            <div class="refer" style="width: 0;">
+                <div class="arrow off" title="参考文献"><span></span></div>
+                <div class="js-scrollbox" >
+                    
+                    <div class="subbox active">
+                        <h4>
+                            <span class="tit">参考文献</span>
+                            <a class="close" href="javascript:void(0)">x</a>
+                        </h4>
+                        <div class="side-scroller">
+                            <ul class="refer-list">
+                                <li id="260">
+
+
+                                    <a id="bibliography_1" title="SIEGEL R L,MILLER K D,JEMAL A,et al.Cancer statistics,2020[J].CA Cancer J Clin,2020,70(1):7-30." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD4D98D3C0C8FF3B31BEDC3B578580AF99&amp;v=MTQzMDdXQ09OdkZTaVdXcjdKSUZwbWFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdz1OaWZiYXJmTUY5bTRyUHhGRitONWVuOUx6QmRobjBzT1N3M25xeG93Y2JMbE03Tw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[1]</b>
+                                        SIEGEL R L,MILLER K D,JEMAL A,et al.Cancer statistics,2020[J].CA Cancer J Clin,2020,70(1):7-30.
+                                    </a>
+                                </li>
+                                <li id="262">
+
+
+                                    <a id="bibliography_2"   style="color:#aaaaaa" >
+                                        <b>[2]</b>
+                                    ZHANG Y F,JIANG S H,HU L P,et al.Targeting the tumor microenvironment for pancreatic ductal adenocarcinoma therapy[J].Chin Clin Oncol,2019,8(2):18.</a>
+                                </li>
+                                <li id="264">
+
+
+                                    <a id="bibliography_3" title="KAMISAWA T,ISAWA T,KOIKE M,et al.Hematogenous metastases of pancreatic ductal carcinoma[J].Pancreas.1995,1(4):345-349." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12103002139470&amp;v=MzE5MDU0OUhaZWdHQ0hzNW9CTVQ2VDRQUUgvaXJSZEdlcnFRVE1ud1plWnRGU2ptVTcvSUlsb1JhQlk9TmlmYmFySzZIOUhQcg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[3]</b>
+                                        KAMISAWA T,ISAWA T,KOIKE M,et al.Hematogenous metastases of pancreatic ductal carcinoma[J].Pancreas.1995,1(4):345-349.
+                                    </a>
+                                </li>
+                                <li id="266">
+
+
+                                    <a id="bibliography_4"   style="color:#aaaaaa" >
+                                        <b>[4]</b>
+                                    KAMISAWA T,WOOD L D,ITOI T,et al.Pancreatic cancer[J].Lancet,2016,388(10039):73-85.</a>
+                                </li>
+                                <li id="268">
+
+
+                                    <a id="bibliography_5"   style="color:#aaaaaa" >
+                                        <b>[5]</b>
+                                    XIE F,LING L,VAN DAM H,et al.TGF-β signaling in cancer metastasis[J].Acta Biochim Biophys Sin (Shanghai),2018,50(1):121-132.</a>
+                                </li>
+                                <li id="270">
+
+
+                                    <a id="bibliography_6" title="SHAFI A A,YEN A E,WEIGEL N L.Androgen receptors in hormone-dependent and castration-resistant prostate cancer[J].Pharmacol Ther,2013,140(3):223-238." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SFJG&amp;filename=SFJGE2951A185295055398DFCBBABDB021C5&amp;v=MTYyMDBGOVROM281Tllla0dDWHc4eWhVYTRrc0xPdzJRM1dCQkM3S1dSTW1hQ09OdkZTaVdXcjdKSUZwbWFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdz1OaXZCYWNhNg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[6]</b>
+                                        SHAFI A A,YEN A E,WEIGEL N L.Androgen receptors in hormone-dependent and castration-resistant prostate cancer[J].Pharmacol Ther,2013,140(3):223-238.
+                                    </a>
+                                </li>
+                                <li id="272">
+
+
+                                    <a id="bibliography_7" title="BERNARD V,YOUNG J,CHANSON P,et al.New insights in prolactin:pathological implications[J].Nat Rev Endocrinol,2015,11(5):265-275." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPDBFC7EE9694F64687DC05CA7BBAC9EB93&amp;v=MDg5MjZmYmFzSE9iZGE1Mm9aRGJlOTVDbmcveHhGbm1UOTRPdzdsM21CRUNydmhON09jQ09OdkZTaVdXcjdKSUZwbWFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdz1OaQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[7]</b>
+                                        BERNARD V,YOUNG J,CHANSON P,et al.New insights in prolactin:pathological implications[J].Nat Rev Endocrinol,2015,11(5):265-275.
+                                    </a>
+                                </li>
+                                <li id="274">
+
+
+                                    <a id="bibliography_8" title="GOFFIN V,BINART N,TOURAINE P,et al.Prolactin:the new biology of an old hormone[J].Annu Rev Physiol,2002,64:47-67." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SARD&amp;filename=SARD00000022865&amp;v=MDY4OTJSN3FkWk9kdEZ5amxVYnZOSWxvPU5pelphck80SHRITXI0MUhiTzBLWTNrNXpCZGg0ajk5U1hxUnJ4b3hjTUg3&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[8]</b>
+                                        GOFFIN V,BINART N,TOURAINE P,et al.Prolactin:the new biology of an old hormone[J].Annu Rev Physiol,2002,64:47-67.
+                                    </a>
+                                </li>
+                                <li id="276">
+
+
+                                    <a id="bibliography_9" title="SWAMINATHAN G,VARGHESE B,FUCHS S Y.Regulation of prolactin receptor levels and activity in breast cancer[J].J Mammary Gland Biol Neoplasia,2008,13(1):81-91." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD13031200655765&amp;v=MDY2NTlSYUJZPU5pZmJhcks3SHRMTnJZOUZZdTRLQzNvOG9CTVQ2VDRQUUgvaXJSZEdlcnFRVE1ud1plWnRGU2ptVTcvSUlsbw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[9]</b>
+                                        SWAMINATHAN G,VARGHESE B,FUCHS S Y.Regulation of prolactin receptor levels and activity in breast cancer[J].J Mammary Gland Biol Neoplasia,2008,13(1):81-91.
+                                    </a>
+                                </li>
+                                <li id="278">
+
+
+                                    <a id="bibliography_10" title="BOLE-FEYSOT C,GOFFIN V,EDERY M,et al.Prolactin (PRL) and its receptor:actions,signal transduction pathways and phenotypes observed in PRL receptor knockout mice[J].Endocr Rev,1998,19(3):225-268." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12102800595817&amp;v=MTQzMTlHZXJxUVRNbndaZVp0RlNqbVU3L0lJbG9SYUJZPU5pZmJhcks2SDlIT3A0OUZZZUlLQkgwK29CTVQ2VDRQUUgvaXJSZA==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[10]</b>
+                                        BOLE-FEYSOT C,GOFFIN V,EDERY M,et al.Prolactin (PRL) and its receptor:actions,signal transduction pathways and phenotypes observed in PRL receptor knockout mice[J].Endocr Rev,1998,19(3):225-268.
+                                    </a>
+                                </li>
+                                <li id="280">
+
+
+                                    <a id="bibliography_11" title="MILLER S L,DEMARIA J E,FREIER D O,et al.Novel association of VAV2 and NEK3 modulates signaling through the human prolactin receptor[J].Mol Endocrinol,2005,19(4):939-949." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12102400765905&amp;v=MjI5ODJZPU5pZmJhcks2SDlIT3E0OUZZKzBLQlh3OG9CTVQ2VDRQUUgvaXJSZEdlcnFRVE1ud1plWnRGU2ptVTcvSUlsb1JhQg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[11]</b>
+                                        MILLER S L,DEMARIA J E,FREIER D O,et al.Novel association of VAV2 and NEK3 modulates signaling through the human prolactin receptor[J].Mol Endocrinol,2005,19(4):939-949.
+                                    </a>
+                                </li>
+                                <li id="282">
+
+
+                                    <a id="bibliography_12"   style="color:#aaaaaa" >
+                                        <b>[12]</b>
+                                    TANDON M,COUDRIET G M,CRISCIMANNA A,et al.Prolactin promotes fibrosis and pancreatic cancer progression[J].Cancer Res,2019,79(20):5316-5327.</a>
+                                </li>
+                                <li id="284">
+
+
+                                    <a id="bibliography_13" title="HEINEMANN V,WILKE H,MERGENTHALER H G,et al.Gemcitabine and cisplatin in the treatment of advanced or metastatic pancreatic cancer[J].Ann Oncol,2000,11(11):1399-1403." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12090404392176&amp;v=MjMwMDcvb0JNVDZUNFBRSC9pclJkR2VycVFUTW53WmVadEZTam1VNy9JSWxvUmFCWT1OaWZiYXJLNkh0ak1xNDlCWitJTkRYcw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[13]</b>
+                                        HEINEMANN V,WILKE H,MERGENTHALER H G,et al.Gemcitabine and cisplatin in the treatment of advanced or metastatic pancreatic cancer[J].Ann Oncol,2000,11(11):1399-1403.
+                                    </a>
+                                </li>
+                                <li id="286">
+
+
+                                    <a id="bibliography_14" title="DE SOUSA CAVALCANTE L,MONTEIRO G.Gemcitabine:metabolism and molecular mechanisms of action,sensitivity and chemoresistance in pancreatic cancer[J].Eur J Pharmacol,2014,741:8-16." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJES&amp;filename=SJES14110600039129&amp;v=MjQ0MjdGWk9nR0RYNHdvQk1UNlQ0UFFIL2lyUmRHZXJxUVRNbndaZVp0RlNqbVU3L0lJbG9SYUJZPU5pZk9mYks4SDlETXFZOQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[14]</b>
+                                        DE SOUSA CAVALCANTE L,MONTEIRO G.Gemcitabine:metabolism and molecular mechanisms of action,sensitivity and chemoresistance in pancreatic cancer[J].Eur J Pharmacol,2014,741:8-16.
+                                    </a>
+                                </li>
+                                <li id="288">
+
+
+                                    <a id="bibliography_15" title="贾振忠，霍景山.胰腺癌的病理分型及临床特点[J].山东医药，2000(22):52-53." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=CJFD&amp;filename=SDYY200022060&amp;v=MjI4MzVxcUJ0R0ZyQ1VSN21lWmVkdUZ5cmhWcjNNTmluU2Q3RzRIdEhPclk5RFpJUUtESDg0dlI0VDZqNTRPM3o=&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[15]</b>
+                                        贾振忠，霍景山.胰腺癌的病理分型及临床特点[J].山东医药，2000(22):52-53.
+                                    </a>
+                                </li>
+                                <li id="290">
+
+
+                                    <a id="bibliography_16" title="VASAIKAR S V,STRAUB P,WANG J,et al.LinkedOmics:analyzing multi-omics data within and across 32 cancer types[J].Nucleic Acids Res,2018,46(D1):D956-D963." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD7B66EC275E5CC43F6E831BDE3ADF2CB6&amp;v=MTQ1MzB5Nndxdz1OaWZiYXJUS0dOZTUzSTFDWVo0S2Z3ODl6R0FWbnpkK1NRMlcyUkZFRGNTV05zaVpDT052RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[16]</b>
+                                        VASAIKAR S V,STRAUB P,WANG J,et al.LinkedOmics:analyzing multi-omics data within and across 32 cancer types[J].Nucleic Acids Res,2018,46(D1):D956-D963.
+                                    </a>
+                                </li>
+                                <li id="292">
+
+
+                                    <a id="bibliography_17" title="RAM MAKENA M,GATLA H,VERLEKAR D,et al.Wnt/β-catenin signaling:the culprit in pancreatic carcinogenesis and therapeutic resistance[J].Int J Mol Sci,2019,20(17):4242." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJMD&amp;filename=SJMD3FE8EFD1BDC0E7B5D411E694BDCAB1C1&amp;v=MTE5ODJrK3ZSTm43ajU4UFhucnFHQkJDc1BtUk1tZUNPTnZGU2lXV3I3SklGcG1hQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9TmlmR2FyRE9hOW01MmZ0RUZwOThEQQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[17]</b>
+                                        RAM MAKENA M,GATLA H,VERLEKAR D,et al.Wnt/β-catenin signaling:the culprit in pancreatic carcinogenesis and therapeutic resistance[J].Int J Mol Sci,2019,20(17):4242.
+                                    </a>
+                                </li>
+                                <li id="294">
+
+
+                                    <a id="bibliography_18" title="HESLER R A,HUANG J J,STARR M D,et al.TGF-β-induced stromal CYR61 promotes resistance to gemcitabine in pancreatic ductal adenocarcinoma through downregulation of the nucleoside transporters hENT1 and hCNT3[J].Carcinogenesis,2016,37(11):1041-1051." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD00E84981B1881FCECE06F8DC5A26BCF3&amp;v=MjM2MDN2RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZmJhck80YTluSXBvZEVGdW9IQkgxUHZHTmduejk3UG5lVzN4ZEVlN1RtTnN5Y0NPTg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[18]</b>
+                                        HESLER R A,HUANG J J,STARR M D,et al.TGF-β-induced stromal CYR61 promotes resistance to gemcitabine in pancreatic ductal adenocarcinoma through downregulation of the nucleoside transporters hENT1 and hCNT3[J].Carcinogenesis,2016,37(11):1041-1051.
+                                    </a>
+                                </li>
+                                <li id="296">
+
+
+                                    <a id="bibliography_19" title="VON AHRENS D,BHAGAT T D,NAGRATH D,et al.The role of stromal cancer-associated fibroblasts in pancreatic cancer[J].J Hematol Oncol,2017,10(1):76." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD651CD296D57308706597B00EF33E1E4C&amp;v=MzE4MzNpZmJhclc5SDZLNHJZWkRFTzRJRDN3eHlCWVY3elo2T24vaTJXUTJlc2VWTUw3c0NPTnZGU2lXV3I3SklGcG1hQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9Tg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[19]</b>
+                                        VON AHRENS D,BHAGAT T D,NAGRATH D,et al.The role of stromal cancer-associated fibroblasts in pancreatic cancer[J].J Hematol Oncol,2017,10(1):76.
+                                    </a>
+                                </li>
+                                <li id="298">
+
+
+                                    <a id="bibliography_20" title="FRUEHAUF J P,BREM H,BREM S,et al.In vitro drug response and molecular markers associated with drug resistance in malignant gliomas[J].Clin Cancer Res,2006,12(15):4523-4532." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12102300430977&amp;v=MjQwODhZT2dQQlhzK29CTVQ2VDRQUUgvaXJSZEdlcnFRVE1ud1plWnRGU2ptVTcvSUlsb1JhQlk9TmlmYmFySzZIOUhPckk5Rg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[20]</b>
+                                        FRUEHAUF J P,BREM H,BREM S,et al.In vitro drug response and molecular markers associated with drug resistance in malignant gliomas[J].Clin Cancer Res,2006,12(15):4523-4532.
+                                    </a>
+                                </li>
+                                <li id="300">
+
+
+                                    <a id="bibliography_21" title="付强，成静，张金岱，等.MiR-145调节G蛋白偶联受体98抑制结直肠癌细胞的奥沙利铂耐药性[J].中华胃肠外科杂志，2017,20(5):566-573." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=CJFD&amp;filename=ZWCW201705027&amp;v=MDAxODNJZWJHNEg5Yk1xbzlIWTRRS0RIODR2UjRUNmo1NE8zenFxQnRHRnJDVVI3bWVaZWR1RnlyaFZyM01QenI=&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[21]</b>
+                                        付强，成静，张金岱，等.MiR-145调节G蛋白偶联受体98抑制结直肠癌细胞的奥沙利铂耐药性[J].中华胃肠外科杂志，2017,20(5):566-573.
+                                    </a>
+                                </li>
+                                <li id="302">
+
+
+                                    <a id="bibliography_22" title="SHUKLA S K,PUROHIT V,MEHLA K,et al.MUC1 and HIF-1alpha signaling crosstalk induces anabolic glucose metabolism to impart gemcitabine resistance to pancreatic cancer[J].Cancer Cell,2017,32(1):71-87.e7." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJES&amp;filename=SJES5A16D1C269A20F53C46BB8C3C2165E79&amp;v=MjIwMDNIWXVKK0RueFB5aFZnN2prUE9uZVJyMkUzZUxTUk1MMldDT052RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZk9mYmJKSDllNHJ2eA==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[22]</b>
+                                        SHUKLA S K,PUROHIT V,MEHLA K,et al.MUC1 and HIF-1alpha signaling crosstalk induces anabolic glucose metabolism to impart gemcitabine resistance to pancreatic cancer[J].Cancer Cell,2017,32(1):71-87.e7.
+                                    </a>
+                                </li>
+                                <li id="304">
+
+
+                                    <a id="bibliography_23" title="HIDALGO M,CASCINU S,KLEEFF J,et al.Addressing the challenges of pancreatic cancer:future directions for improving outcomes[J].Pancreatology,2015,15(1):8-18." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJES&amp;filename=SJESA14420172AF4D90C6B2450B88A5C17B6&amp;v=MDg0MjN2RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZk9mY0s1R3RYT3I0NUNacHA1Q0Fnd3oyVVZtRDE1VFgrUXBCcEVmTUdWUXNpWkNPTg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[23]</b>
+                                        HIDALGO M,CASCINU S,KLEEFF J,et al.Addressing the challenges of pancreatic cancer:future directions for improving outcomes[J].Pancreatology,2015,15(1):8-18.
+                                    </a>
+                                </li>
+                                <li id="306">
+
+
+                                    <a id="bibliography_24" title="BERNARD V,YOUNG J,BINART N.Prolactin-a pleiotropic factor in health and disease[J].Nat Rev Endocrinol,2019,15(6):356-365." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPDD06955F9BB24CC42FF85223E4BD37E7A&amp;v=MDY3MjBhc2U0R05qSnF2bE1GcGtOQ0E5S3l4UmxuRGQ0U24zaDJSWkhEYkdUTUwzdUNPTnZGU2lXV3I3SklGcG1hQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9TmlmYg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[24]</b>
+                                        BERNARD V,YOUNG J,BINART N.Prolactin-a pleiotropic factor in health and disease[J].Nat Rev Endocrinol,2019,15(6):356-365.
+                                    </a>
+                                </li>
+                                <li id="308">
+
+
+                                    <a id="bibliography_25" title="ZHOU Y,ZONG H,HAN L,et al.A novel bispecific antibody targeting CD3 and prolactin receptor (PRLR) against PRLR-expression breast cancer[J].J Exp Clin Cancer Res,2020,39(1):87." target="_blank"
+                                       href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD1B379CD61D9AEB2B77150E6D15357163&amp;v=MTI1NTBNd2VyZVRSTHljQ09OdkZTaVdXcjdKSUZwbWFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdz1OaWZiYXJMS0hkYkYzUHREWlo4R2ZRbEx6V1FVN1Q1NFNBcmsyQg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">
+                                        <b>[25]</b>
+                                        ZHOU Y,ZONG H,HAN L,et al.A novel bispecific antibody targeting CD3 and prolactin receptor (PRLR) against PRLR-expression breast cancer[J].J Exp Clin Cancer Res,2020,39(1):87.
+                                    </a>
+                                </li>
+                            </ul>
+                            <div style='display: none;' class="zqscroller" >
+                                <h4 class="">附加材料</h4>
+                                <ul></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            &nbsp;
+            <!--此处有一空格符 勿删-->
+        </div>
+
+        
+<script src="/kxreader/Scripts/vue.js" type="text/javascript"></script>
+
+<div class="content">
+    
+    <div class="hello-yx-box" id="mainContent" v-if="mainContentShow&&IsOrgUser" v-cloak>
+        <div class="hello-tr">
+            <span class="co" id="clockTime">10</span>秒
+            <a href="javascript:void(0)" class="hello-x" id="CloseId" v-on:click="clickClosePop()">关闭</a>
+        </div>
+        <p class="hello-t">尊敬的用户您好：</p>
+        <p class="hello-p" v-if="indiAccountShow">登录您的个人账号后可使用笔记、摘录、复制、收藏文献、阅读历史等功能帮助您进行深度阅读，同时也支持在线写作、投稿分析及个人知识管理。</p>
+        <p class="hello-p" v-else>进入知网研学平台，可对本文做笔记、摘录、复制等操作，帮助您进行深度阅读；平台也支持收藏文献、查看阅读历史、在线写作、投稿分析及个人知识管理等功能。</p>
+        <a href="javascript:void(0)" class="btn btn-blue" id="loginBtn" v-on:click="clickLogin()" v-if="indiAccountShow">立即登录个人账号</a>
+        <a href="https://x.cnki.net/read/readonline.ashx?dbcode=CJFQ&amp;filename=&amp;fileSourceType=1&amp;fromId=CNKI_READ" class="btn btn-blue" tager="_blank" id="loginBtn" v-else>立即体验</a>
+        <a href="javascript:void(0)" class="a-cg9" id="displayId" v-on:click="clickLoginShow()">7天内不再显示</a>
+    </div>
+    
+    <div class="promptPackage" id="promptBox" v-show="promptShow" v-cloak>
+        <div class="promptBox">
+            <div class="promptBoxTitle">提示</div>
+            <p class="promptBoxContent">关闭网页后，您在本页面的笔记等操作将清空。进入<span class="promptBoxSpan">知网研学</span>,可将当前页面笔记保存至您的个人账户。是否要继续操作？</p>
+            <div class="promptButton">
+                <input type="checkbox" /> 7天内不再显示
+                <div class="promptBtn">
+                    <button class="promptBoxClose">取消</button>
+                    <button class="promptBoxGoon">继续</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+
+
+    <!--tips start-->
+                <div class="tips">
+                <a href="http://navi.cnki.net/KNavi/JournalDetail?pcode=CJFD&amp;pykm=ZZLL" target="_blank">肿瘤</a>
+            2021,41(06),383-393         </div>
+    <!--tips end-->
+        <div class="top-title">
+            <h1 class="title" id="topTitle">
+                <span class="vm">沉默PRLR表达增加胰腺导管腺癌细胞的耐药性</span>
+                            </h1>
+
+                <div class="btn-downloads  btn-downloads-new">
+                    <a class="read read-btn-special" id="readSpecial" onclick="clickJd()"><i class="i-btn i-care"></i>精读</a>
+                    <a class="read sou-btn-cang" id="souCang" onclick="clickSc()"><i class="i-btn i-care"></i>收藏</a>
+                </div>
+
+        </div>
+                <h2 id="authorsId">
+                            <a id="authorId" >张一帆</a>
+                            <a id="authorId" >黄佩琦</a>
+                            <a id="authorId" >孙悦</a>
+                            <a id="authorId" >潘泓</a>
+                            <a id="authorId" >盖严支</a>
+                            <a id="authorId" >聂惠贞</a>
+            </h2>
+            <h2 id="InfoOrgsId">
+                <a id="InfoOrgId" href="/kcms/detail/knetsearch.aspx?dbcode=CJFQ&amp;sfield=in&amp;skey=%E4%B8%8A%E6%B5%B7%E4%BA%A4%E9%80%9A%E5%A4%A7%E5%AD%A6%E5%8C%BB%E5%AD%A6%E9%99%A2%E9%99%84%E5%B1%9E%E4%BB%81%E6%B5%8E%E5%8C%BB%E9%99%A2%E4%B8%8A%E6%B5%B7%E5%B8%82%E8%82%BF%E7%98%A4%E7%A0%94%E7%A9%B6%E6%89%80%E7%99%8C%E5%9F%BA%E5%9B%A0%E5%8F%8A%E7%9B%B8%E5%85%B3%E5%9F%BA%E5%9B%A0%E5%9B%BD%E5%AE%B6%E9%87%8D%E7%82%B9%E5%AE%9E%E9%AA%8C%E5%AE%A4&amp;code=1051521&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" target="_blank">上海交通大学医学院附属仁济医院上海市肿瘤研究所癌基因及相关基因国家重点实验室</a>
+        </h2>
+
+    
+<div class="link">
+    <a id="aexport" class="icon icon-output"  onclick="" href="javascript:void(0);" target="_blank"><i></i>导出/参考文献</a>
+    
+    <span class="shareBoard" onmouseover="$('#sharedet').show();$('#this').addClass('shareBoardCUR')" onmouseout="$('#sharedet').hide();$('#this').removeClass('shareBoardCUR')">
+        <a class="icon icon-share" href="#"><i></i>分享<em></em></a>
+        <ul class="shareHide" id="sharedet" style="display: none;">
+            <li><a title="复制链接" class="copy" onclick="" href="#"><i></i>复制链接</a></li>
+            <li><a title="分享到新浪微博" class="xl" onclick="" href="javascript:common.ShareAction('xl');"><i></i>新浪微博</a></li>
+            
+        </ul>
+    </span>
+    
+    <a class="icon icon-print" onclick="window.print();" href="javascript:void(0);"><i></i>打印</a>
+    
+    <!--版本切换 end-->
+</div>
+<script type="text/javascript">
+    //点击关注按钮
+
+    function refTrack() {
+        var data = {
+            idenID: window.Lid,
+            clientID: window.Ecp_ClientId,
+            userIP: window.Ecp_ClientIp,
+            platformURL: 'kns@platform',
+            operateType: document.getElementById('RefTrack').innerText == '关注' ? 'add': 'delete',
+            resourceType: paper,
+            resourceID:   "ZZLL202106002",
+            productID: 'CJFQ'
+        };
+        $.ajax({
+            url: "POST /api/UserDataCenter/Concern",
+            data: data,
+            type: "post",
+            success: function (result) {
+                debugger
+                console.log(result);
+                if (result.Success == true && result.Data >= 1 && document.getElementById('RefTrack').innerText == '关注') {
+                    document.getElementById('RefTrack').innerText = '已关注'
+                } else {
+                    document.getElementById('RefTrack').innerText = '关注'
+                }
+
+            }, error: function () {
+                
+            }
+        });
+        //var result = {
+        //    Success: true,
+        //    Data: 1,
+        //}
+        //if (result.Success == true && result.Data >= 1 && document.getElementById('RefTrack').innerText == '关注') {
+        //    debugger
+        //    document.getElementById('RefTrack').innerText = '已关注'
+        //} else {
+        //    document.getElementById('RefTrack').innerText = '关注'
+        //}
+    }
+
+    //點擊收藏----在點擊收藏的時候得取消---如果收藏顏色變化了就不走接口了
+    function souCang() {
+        var data = {
+            idenID: window.Lid,
+            clientID: window.Ecp_ClientId,
+            userIP: window.Ecp_ClientIp,
+            platformURL: 'kns@platform',
+            operateType: document.getElementById('ashoucang').innerText == '关注' ? 'delete': 'add',
+            productID: "",
+            fileID: "",
+        };
+        $.ajax({
+            url: "/api/UserDataCenter/CollectFile",
+            data: data,
+            type: "post",
+            success: function (result) {
+                debugger
+                console.log(result);
+                //根據返回信息去判斷innerText是什麼值
+                document.getElementById('RefTrack').innerText == '已关注'
+            }, error: function () {
+                
+            }
+        });
+
+
+    }
+
+</script>                <div class="data" id="a_abstract"><span class="keys" id="c_abstract">摘<span style="font-family: 'Times New Roman';">&nbsp;&nbsp;&nbsp;&nbsp;</span>要：</span><p id="b-abstract"><span>目的：探究催乳素受体（prolactin receptor,PRLR）在胰腺导管腺癌（pancreatic ductal adenocarinoma,PDAC）发生和发展过程中表达水平的变化，及其表达水平改变对PDAC细胞对耐药和凋亡的影响和可能的作用机制。方法 ：利用基因综合表达（Gene Expression Omnibus,GEO）数据库分析PRLR在PDAC及其癌旁组织中的表达水平及在肿瘤发生和发展过程中表达量的变化。癌症基因组图谱（e Cancer Genome Atlas,TCGA）分析PRLR表达水平与患者预后的相关性。采用实时荧光定量PCR、蛋白质印迹法和免疫组织化学法检测PRLR mRNA和蛋白在PDAC细胞和组织内的表达水平。同时，利用基因集富集分析（Gene Set Enrichment analysis,GSEA）等生物信息学手段推断PRLR在PDAC中可能涉及的信号通路。利用shRNA技术沉默PANC-1和SW-1990细胞中PRLR的表达水平后，分别采用CCK-8和FCM法检测下调PRLR表达对PDAC细胞对吉西他滨（gemcitabine）耐药和凋亡的影响，以及对耐药相关因子转酮醇酶（transketolase,TKT）和葡萄糖-6-磷酸脱氢酶（glucose-6-phosphatedehydrogenase,G6PD）表达的影响。结果：GEO数据分析结果表明，PRLR在PDAC组织中表达量下降。TCGA分析结果表明，PRLR低表达与患者的不良生存相关。GSEA分析结果表明，PRLR的表达量与PDAC细胞中Wnt通路、转化生长因子β(transforminggrowthfactor-β,TGF-β)通路和Janus激酶（janus kinase,JAK）-信号转导及转录激活因子（signaltransducerandactivator oftranscription,STAT）通路等耐药通路相关。基因共表达分析数据分析也表明，PRLR表达量的降低与肿瘤耐药基因谷胱甘肽-S-转移酶P1(glutathione-S-transferase P1,GSPT1)表达量升高相关，同时与抑制肿瘤耐药的黏附G蛋白偶联受体V1(adhesion G-protein coupled receptor V1,GPR98)表达量降低相关。敲低PANC-1和SW-1990细胞中PRLR的表达水平后，能够提高肿瘤细胞对于吉西他滨的耐药性并降低细胞的凋亡率（P均&lt;0.01），并能够提高耐药相关因子TKT和G6PD的表达水平（P均&lt;0.01）。结论 ：PRLR在PDAC中低表达，沉默PDAC细胞中PRLR的表达水平可进一步提高PDAC细胞的耐药性并降低细胞的凋亡能力，提示其可能是一个潜在的肿瘤治疗靶点。</span></p></div>
+            <div class="data" id="a_keywords">
+            <p id="b_keywords">
+                <span class="keys">关键词：</span><span><a  class="keyprogram">胰腺导管腺癌;</a></span><span><a  class="keyprogram">催乳素受体;</a></span><span><a  class="keyprogram">耐药性;</a></span><span><a  class="keyprogram">吉西他滨;</a></span>            </p>
+        </div>
+    
+    <!--brief start-->
+    
+        <div class="brief"><p id="briefId"><b>作者简介：</b><span>*聂惠贞，E-mail:hznie@shsci.org;</span></p><p><b>收稿日期：</b>2021-01-18</p><p id="fundId"><b>基金：</b><span>上海市卫健委资助课题(201740105);</span></p></div>
+            <h1 id="EngTitle">Knockdown of prolactin receptor expression increases chemoresistance to pancreatic ductal adenocarcinoma cells</h1>
+            <h2 id="EngName">
+                <span>ZHANG Yifan</span>
+                <span>HUANG Peiqi</span>
+                <span>SUN Yue</span>
+                <span>PAN Hong</span>
+                <span>GAI Yanzhi</span>
+                <span>NIE Huizhen</span>
+        </h2>
+            <h2 id="EngDepart">
+                <span>State Key Laboratory of Oncogenes and Related Genes,Ren Ji Hospital,Shanghai Jiao Tong University of Medicine,Shanghai Jiao Tong University</span>
+        </h2>
+                <div class="data" id="a_abstractEN"><span class="keys">Abstract：</span><p><b>Objective:</b>To investigate the changes of prolactin receptor (PRLR) expression level during development of pancreatic ductal adenocarcinoma (PDAC),and its potential mechanism of drug resistance and apoptosis of PDAC cells.<b>Methods:</b>The gene expression of PRLR was analyzed in PDAC and normal pancreatic tissue during tumorigenesis and development with Gene Expression Omnibus (GEO) database.The expression and prognosis of PRLR was analyzed by The Cancer Genome Atlas (TCGA) database.The expression level of PRLR mRNA and protein level in PDAC and normal pancreatic tissue,the quantitative real time PCR,western blotting and immunohistochemistry were used.Meanwhile,the potential pathway was discovered with Gene Set Enrichment analysis (GSEA) and other bioinformatics method.The drug resistance of gemcitabine and apoptosis to PDAC cells were detected by CCK-8 and FCM respectively with the PANC-1 and SW-1990 cells line knockdown PRLR expression with short hairpin RNA (shRNA).Lastly,the expression relationship between PRLR and transketolase (TKT) and glucose-6-phosphatedehydrogenase (G6PD) was investigated in PDAC cells.<b>Results:</b>The result of GEO and TCGA data demonstrated that PRLR expression declined in PDAC tissue and correlated with patient poor prognosis respectively.In GESA analysis,the PRLR expression was discovered that related to Wnt,transforming growth factor-β (TGF-β),janus kinase (JAK)-signal transducer and activator of transcription (STAT) pathway which related to PDAC drug resistance.The gene co-expression analysis show that PRLR expression positively related to glutathione-S-transferase P1 (GSPT1) which increased PDAC cells drug resistance and negatively related to adhesion G-protein coupled receptor V1 (GPR98) which decreased PDAC cells drug resistance.In PANC-1 and SW-1990 cells,knockdown PRLR expression increased drug resistance to gemcitabine and decreased the apoptosis rate,and increased TKT and G6PD expression levels (all P &lt; 0.01).<b>Conclusion:</b>Depletion PRLR,which low express in PDAC tissue,will increased PDAC cell drug resistance and decreased PDAC cell apoptosis,which suggested that it may be a potential tumor therapeutic target.</p></div>
+            <div class="data" id="a_keywordsEN">
+            <span class="keys">Keyword：</span>
+            <p>
+                    <span>Ductal adenocarcinoma of the pancreas;</span>
+                    <span>Prolactin receptor;</span>
+                    <span>Drug resistance;</span>
+                    <span>Gemcitabine;</span>
+            </p>
+        </div>
+            <div class="brief">
+            
+                <p>
+                        <b>Author：</b>
+                                                <span>
+                                NIE Huizhen，E-mail: hznie@shsci.org;
+                            </span>
+                </p>
+                            <p><b>Received：</b> 2021-01-18</p>
+                            <p>
+<b>Fund：</b><span>Project of Shanghai Municipal Health Commision (201740105);</span>                </p>
+        </div>
+
+
+    <!--brief start-->
+    
+
+
+                <div class="p1">
+                    <p id="195">FINANCIAL DISCLOSURE:The authors have indicated they have no financial relationships relevant to this article to disclose.</p>
+                </div>
+                <div class="p1">
+                    <p id="196">胰腺导管腺癌(pancreatic ductal adenocarinoma，PDAC)是一种常发的胰腺肿瘤，其5年生存率长期低于10%且发病率有上升趋势<citation id="310" type="reference"><link href="260" rel="bibliography" /><sup>[<a class="sup">1</a>]</sup></citation>。PDAC由肿瘤相关成纤维细胞，各种免疫细胞和致密间质组成其复杂的肿瘤微环境<citation id="311" type="reference"><link href="262" rel="bibliography" /><sup>[<a class="sup">2</a>]</sup></citation>。致密的肿瘤微环境能够促进PDAC细胞对于机体免疫系统的逃逸作用，提高肿瘤对于化法和放射疗法的抵抗能力，增强肿瘤细胞的生存能力。此外，PDAC的早期诊断率低，缺乏有效的诊断手段，手术率低且多数患者确诊时都伴有远端转移<citation id="312" type="reference"><link href="264" rel="bibliography" /><link href="266" rel="bibliography" /><sup>[<a class="sup">3</a>,<a class="sup">4</a>]</sup></citation>。目前，对于PDAC发生和发展的机制尚不明确，也没有有效的靶向药物。因此，加强对PDAC的研究十分必要。</p>
+                </div>
+                <div class="p1">
+                    <p id="197">激素是指由内分泌腺或内分泌细胞分泌的，具有微量、高效和专一性特点的生物活性分子，其在靶器官组织中作为信使传递信息，发挥重要的调节作用。除了在生理功能中的作用外，已有多项研究表明激素[如转化生长因子β(transforming growth factor-β，TGF-β)、表皮生长因子和雄激素等]在肿瘤的发生和发展过程中起重要的作用<citation id="313" type="reference"><link href="268" rel="bibliography" /><link href="270" rel="bibliography" /><sup>[<a class="sup">5</a>,<a class="sup">6</a>]</sup></citation>。研究显示，催乳素(prolactin，RPL)由垂体前叶分泌，其在体内发挥促进乳腺发育、刺激泌乳和免疫调节等生理功能<citation id="314" type="reference"><link href="272" rel="bibliography" /><sup>[<a class="sup">7</a>]</sup></citation>。催乳素受体(prolactin receptor，PRLR)是催乳素的专一性受体，同时也是细胞因子受体家族的一员。目前研究表明，活化的PRLR能够激活下游Janus激酶2(janus kinase 2，JAK2)-信号转导及转录激活因子5(signal transducer and activator of transcription 5，STAT5)、Src-磷脂酰肌醇3-激酶(phosphoinositide 3-kinase，PI3K)-蛋白激酶B(protein kinase B，PKB，又称AKT)、Ras-Raf-丝裂原活化蛋白激酶激酶(mitogen-activated protein kinase kinase，MEK)-丝裂原活化蛋白激酶(mitogen-activate protein kinase，MAPK)和NIMA相关激酶3(NIMA related kinase 3，NEK3)-鸟嘌呤核苷酸交换因子2(vav guanine nucleotide exchange factor 2，VAV2)-RAC1等通路<citation id="315" type="reference"><link href="274" rel="bibliography" /><link href="276" rel="bibliography" /><link href="278" rel="bibliography" /><link href="280" rel="bibliography" /><sup>[<a class="sup">8</a>,<a class="sup">9</a>,<a class="sup">10</a>,<a class="sup">11</a>]</sup></citation>。目前关于PRLR的研究多存在于妇科肿瘤(如乳腺癌、卵巢癌等)和前列腺癌中。在PDAC中，有报道称单核巨噬细胞来源的PRL可以与组织中分布于巨噬细胞和胰腺癌前病变胰腺导管上皮内瘤变(pancreatic intraepithelial neoplasia，PanIN)细胞表面的PRLR结合，促进组织纤维化和PDAC的进展<citation id="316" type="reference"><link href="282" rel="bibliography" /><sup>[<a class="sup">12</a>]</sup></citation>。</p>
+                </div>
+                <div class="p1">
+                    <p id="198">吉西他滨(gemcitabine)是一种被广泛应用与局部晚期或转移性胰腺癌的单药化疗脱氧胞苷类化疗药物<citation id="317" type="reference"><link href="284" rel="bibliography" /><sup>[<a class="sup">13</a>]</sup></citation>。吉西他滨在体内代谢后会形成嘧啶的类似物，与dCTP竞争结合参与DNA复制过程，从而抑制肿瘤细胞的生长<citation id="318" type="reference"><link href="286" rel="bibliography" /><sup>[<a class="sup">14</a>]</sup></citation>。在实际应用过程中，患者在接受了一定时间的吉西他滨治疗后，会出现肿瘤耐药的现象。以往研究多集中在如何增加肿瘤微环境中的吉西他滨药物浓度以提高其作用效果，因此本研究旨在寻找吉西他滨的潜在耐药机制，寻找关键耐药分子，为进一步解决其耐药问题提供理论依据。</p>
+                </div>
+                <h3 id="199" name="199" class="anchor-tag"><b>1</b> 材料与方法</h3>
+                <h4 class="anchor-tag" id="200" name="200">1.1 试剂和仪器</h4>
+                <div class="p1">
+                    <p id="201">DEME培养液和胎牛血清(fetal bovine serum，FBS)购自美国Gibco公司。质粒抽提试剂盒购自天根生化科技(北京)有限公司，RNA提取和反转录试剂盒购自日本TaKaRa公司，RT-qPCR Mix试剂盒购自上海圣尔生物科技有限公司，细胞凋亡检测试剂盒购自翌圣生物科技(上海)股份有限公司。鼠抗人PRLR单克隆抗体购自英国Abcam公司，鼠抗人转酮醇酶(transketolase，TKT)、葡萄糖-6-磷酸脱氢酶(glucose-6-phosphatedehydrogenase，G6PD)和β-actin(内参照)单克隆抗体购自美国Proteintech公司，鼠抗人转酮醇酶(transketolase，TKT)、葡萄糖-6-磷酸脱氢酶(glucose-6-phosphatedehydrogenase，G6PD)和β-actin(内参照)单克隆抗体购自美国Proteintech公司，辣根过氧化物酶(horseradish peroxidase，HRP)标记的羊抗鼠IgG(二抗)购自美国Cell Signaling Technology公司。手术获得，并确诊为PDAC的癌及癌旁组织由上海交通大学附属仁济医院胆胰外科提供，所有患者均知情同意且获得伦理审批。</p>
+                </div>
+                <div class="p1">
+                    <p id="202">多功能酶标仪(Infinite M1000 PRO)为瑞士Tecan公司产品，实时荧光定量PCR仪(7500)为美国ABI公司产品，光学显微镜(NI-E)为日本Nikon公司产品，流式细胞仪(LSRFortessa)为美国BD公司产品，电泳仪(1658033)为Bio Rad公司产品。</p>
+                </div>
+                <h4 class="anchor-tag" id="203" name="203">1.2 细胞培养</h4>
+                <div class="p1">
+                    <p id="204">PDAC细胞系PANC-1和SW-1990以及胰腺导管上皮细胞HPNE均购自美国模式菌种保藏中心，并由本实验室保存。所有细胞培养操作均依照美国模式菌种保藏中心标准执行，用含10% FBS以及1%青霉素链霉素双抗的DEME培养液，置于37 ℃、CO<sub>2</sub>体积分数为5%的培养箱中进行培养。细胞传代时用0.25%胰蛋白酶消化后进行传代。</p>
+                </div>
+                <h4 class="anchor-tag" id="205" name="205">1.3 PRLR的筛选</h4>
+                <div class="p1">
+                    <p id="206">利用基因综合表达(Gene Expression Omnibus，GEO)数据库中的GSE102238、GSE15471和GSE71729这3个数据库筛选PDAC中表达差异的基因。将GEO测序数据分为PDAC组织和癌旁正常组织组，利用R语言和GraphPad进行表达差异的分析，之后对分析结果进行汇总、分析和筛选。</p>
+                </div>
+                <h4 class="anchor-tag" id="207" name="207">1.4 患者的生存分析</h4>
+                <div class="p1">
+                    <p id="208">下载癌症基因组图谱(The Cancer Genome Atlas，TCGA)数据库中PDAC患者数据，去除数据集中的癌旁组织测序数据。之后根据PRLR表达量的中位数进行分组，将所有数据分为PRLR高表达组和PRLR低表达组。将TCGA数据库中PDAC患者测序数据与患者临床数据进行整合，利用Graphpad 对患者进行生存分析，绘制生存曲线并进行log-rank Mantel-COX检验。</p>
+                </div>
+                <h4 class="anchor-tag" id="209" name="209">1.5 实时荧光定量PCR检测</h4>
+                <div class="p1">
+                    <p id="210">收集PDAC细胞系PANC-1和SW-1990以及胰腺导管上皮细胞HPNE，采用RNAiso Plus试剂盒提取细胞总RNA，并测量样品RNA浓度。每组各取400 ng总RNA，利用反转录试剂盒将RNA反转录为cDNA；随后以cDNA为模板采用RT-qPCR Mix进行实时荧光定量PCR扩增；以18 S为内参照，以2<sup>-ΔΔ</sup><sup>Ct</sup>值表示目的基因的表达水平。PCR扩增条件为94 ℃预变性5 min；94 ℃变性30 s，58 ℃退火30 s，72 ℃延伸1 min，共40个循环。PRLR基因上游引物序列为5’-CAGACCCTCCTTTGGAGCTG-3’，下游引物序列为5’-TCAGCTGCTTTCTCGG GTTT-3’；TKT基因上游引物序列为5’-TCCA CACCATGCGCTACAAG-3’，下游引物序列为5’-CAAGTCGGAGCTGATCTTCCT-3’；G6PD基因上游引物序列为5’-CGAGGCCGTC ACCAAGAAC-3’，下游引物序列为5’-GTAGT GGTCGATGCGGTAGA-3’；18S上游引物序列为5’-TGCGAGTACTCAACACCAACA-3’，下游引物序列为5’-GCATATCTTCGGCCC ACA-3’。</p>
+                </div>
+                <h4 class="anchor-tag" id="212" name="212">1.6 蛋白质印迹法检测</h4>
+                <div class="p1">
+                    <p id="213">收集PDAC细胞系PANC-1和SW-1990以及胰腺导管上皮细胞HPNE(各5×10<sup>6</sup>个)，采用RIPA裂解液(北京索莱宝科技有限公司产品)裂解细胞后提取总蛋白，并利用BCA试剂盒(美国Thermo公司产品)检测各样品的蛋白浓度。各组细胞取适量的蛋白处理后，采用10% SDS-PAGE分离蛋白(80 V恒压电泳浓缩蛋白样品，120 V恒压电泳分离蛋白)。电泳终止后，将分离后的蛋白转移至硝酸纤维膜上(恒定电压110 V电转60 min)。电转结束后将硝酸纤维膜放入含5%牛血清白蛋白(bovine serum albumin，BSA)的封闭液中封闭1 h；随后将硝酸纤维膜浸泡在一抗工作液中(抗体稀释比例参阅抗体使用说明书)，4 ℃摇床孵育过夜。孵育结束后，用1×TBST清洗膜；之后加入HRP标记的羊抗鼠IgG(体积稀释比例为1∶1 000)，室温孵育1 h后，用电化学发光液显色，拍照并保存结果。</p>
+                </div>
+                <h4 class="anchor-tag" id="214" name="214">1.7 免疫组织化学检测</h4>
+                <div class="p1">
+                    <p id="215">将PDAC组织石蜡切片进行免疫组织化学染色。首先，将石蜡切片置入金属架内，放入二甲苯和乙醇溶液中进行脱蜡和水化。将水化完成的切片完全没入柠檬酸钠溶液内，沸水浴20 min。水浴结束后将清洗好的切片尽量甩干，滴入0.3%的过氧化氢-甲醇溶液覆盖组织，放入湿盒内，37 ℃孵育30 min。孵育完成后利用10% BSA溶液覆盖组织，放入湿盒内，室温孵育60 min。依照抗体说明书利用1% BSA溶液配制PRLR(体积稀释比例为1∶200)抗体工作液，甩掉组织表面封闭液，滴入抗体覆盖组织，放入湿盒内。4 ℃过夜孵育。次日，依照抗体说明书利用10% BSA溶液配制HRP标记的羊抗鼠IgG(体积稀释比例为1∶200)工作液。小心甩干组织周围水分，用二抗工作液覆盖组织。将切片放入湿盒。室温孵育1 h。二抗孵育完成后，依照试剂盒说明书配制DAB显色液。小心甩干组织周围水分，用DAB显色液覆盖组织，待肉眼观察到明显黄色后，将切片放入流水中冲洗10 min以终止反应。将切片放入苏木素复染液内30 s，随后流水终止反应。最后，将切片按照脱蜡/水化相反过程过缸并利用二甲苯溶液溶解中性树脂(1∶1)。将混合液滴在组织上，覆上盖玻片，轻压玻片除去气泡。之后放入通风橱干燥。在光学显微镜下(放大倍数为200倍)下观察切片的染色情况，免疫组织化学染色结果的评判参阅参考文献<citation id="331" type="reference">[<a class="sup">15</a>]</citation>提供的标准。</p>
+                </div>
+                <h4 class="anchor-tag" id="216" name="216">1.8 基因集富集分析(Gene Set Enrichment analysis，GSEA)与共表达分析</h4>
+                <div class="p1">
+                    <p id="217">下载TCGA数据库中胰腺癌患者的数据，去除数据集中的癌旁组织测序数据。之后根据PRLR表达量的中位数进行分组，将所有患者分为PRLR高表达组和PRLR低表达组。利用GSEA软件中Kyoto Encyclopedia of Genes and Genomes(KEGG)数据库进行基因富集分析。之后根据normalized enrichment score (NES)和False discovery rate(FDR)的q值对数据进行选择和筛选。</p>
+                </div>
+                <div class="p1">
+                    <p id="218">采用linkedomics(http://www.linkedomics.org)进行基因共表达分析<citation id="319" type="reference"><link href="290" rel="bibliography" /><sup>[<a class="sup">16</a>]</sup></citation>。在linkedomics中选择PDAC患者的测序数据，并根据PRLR表达量进行计算，最后对结果进行分析。</p>
+                </div>
+                <h4 class="anchor-tag" id="219" name="219">1.9 采用shRNA干扰技术沉默PANC-1和SW-1990细胞中PRLR的表达</h4>
+                <div class="p1">
+                    <p id="220">采用shRNA干扰技术沉默PANC-1和SW-1990细胞中PRLR的表达水平。PRLR-shRNA(shPRLR)的序列为5’-AGCAGCTGATTCCAGAACA-3’，阴性对照(negative control，NC)-shRNA(shNC)的序列为5’-TTCTCCGAACGTGTCACGT-3’(所有shRNA由上海吉玛制药技术有限公司构建)。利用REV、GAG和VSV进行慢病毒包装后，对胰腺癌细胞进行慢病毒感染以构建稳转细胞系。</p>
+                </div>
+                <h4 class="anchor-tag" id="221" name="221">1.10 CCK-8法检测沉默PRLR表达对PANC-1和SW-1900细胞耐药性的影响</h4>
+                <div class="p1">
+                    <p id="222">将PANC-1和SW-1900细胞(shNC组和shPRLR组)接种于96孔板内，培养过夜；待细胞贴壁后除去原有培养液，用PBS进行清洗细胞。之后，依次加入含有0、1 000 000、100 000、10 000、1 000、100、10和1 nmol/L吉西他滨的培养液。37 ℃培养72 h后，加入CCK-8试剂，具体流程依据使用说明书。反应结束后在免疫酶标仪波长450 nm处检测各孔的D值，并利用GraphPad计算吉西他滨对各组细胞的半数抑制浓度(half maximal inhibitory concentration，IC<sub>50</sub>)值。</p>
+                </div>
+                <h4 class="anchor-tag" id="224" name="224">1.11 细胞凋亡检测。</h4>
+                <div class="p1">
+                    <p id="225">将PANC-1和SW-1900细胞(对照组和shPRLR组)接种于6孔板内，待细胞密度合适时，换为无血清培养叶饥饿肿瘤细胞24 h。将各组细胞消化重悬后，用碘化丙啶(propidium iodide，PI)和Annexin Ⅴ染色细胞(具体流程依据凋亡检测试剂盒操作说明书)，同时准备裸细胞，最后上流式细胞仪检测各组细胞的凋亡率。</p>
+                </div>
+                <h4 class="anchor-tag" id="226" name="226">1.12 统计学方法</h4>
+                <div class="p1">
+                    <p id="227">采用GraphPad Prism软件和R语言对研究数据进行统计学分析。所有实验均独立重复3次，计量资料以<image id="259" type="" href="images/ZZLL202106002_25900.jpg" display="inline" placement="inline"><alt></alt></image><i>±s</i>表示。生存分析利用Kaplan-Meier法，并采用log-rank Mantel-COX test进行检验。多组间比较采用单因素方差分析，组内两两比较采用LSD-t检验。以P&lt;0.05为差异有统计学意义。</p>
+                </div>
+                <h3 id="228" name="228" class="anchor-tag"><b>2</b> 结 果</h3>
+                <h4 class="anchor-tag" id="229" name="229">2.1 PRLR在PDAC组织及细胞中的表达情况</h4>
+                <div class="p1">
+                    <p id="230">首先利用GEO数据库中胰腺癌患者的测序数据(GSE102238、GSE15417和GSE71729)进行表达差异基因的筛选。GSE102238和GSE15417数据库统计结果显示，PRLR在PDAC组织中的表达水平均明显低于正常癌旁组织(P均&lt;0.01)；GSE71729数据库统计结果显示，PRLR在胰腺癌肝转移组织中的表达水平明显低于正常肝组织(P&lt;0.01)(图1A)。这一结果提示，PRLR在胰腺癌的发生和发展过程中可能起到抑制肿瘤生长的作用。</p>
+                </div>
+                <div class="p1">
+                    <p id="231">为了进一步明确PRLR对PDAC的影响，通过下载TCGA数据库中胰腺癌患者的数据，对患者进行了生存分析。结果(图1B)显示，PRLR高表达组患者(88例)的总生存(overall survival，OS)和无病生存(disease-free survival，DFS)时间均长于PRLR低表达组(86例)患者(P均&lt;0.01)。这个结果进一步阐明了，PRLR对于PDAC发展可能发挥负调节作用。</p>
+                </div>
+                <div class="p1">
+                    <p id="232">为了进一步研究PRLR在PDAC中的变化趋势，本研究对来源于自发PDAC小鼠模型的肿瘤测序数据进行了分析(GSE33322)。结果(图1C)表明，PRLR在从正常组织发展为PanIN组织过程中，表达量的变化差异无统计学意义；但在从PanIN发展为PDAC的过程中其表达量明显降低。这种趋势提示，PRLR的作用更可能发生在PDAC的发展阶段而不是发生阶段。</p>
+                </div>
+                <div class="p1">
+                    <p id="233">为了进一步验证PRLR在肿瘤中的表达情况，分别采用实时荧光定量PCR法和蛋白质印迹法检测PRLR mRNA和蛋白在胰腺癌PANC-1和SW-1990细胞以及正常胰腺导管上皮HPNE细胞中的表达水平。结果显示，胰腺癌PANC-1和SW-1990细胞中PRLR mRNA(图2A)和蛋白(图2B)的表达水平均较HPNE细胞明显下调(P均&lt;0.01)。免疫组织化学法检测结果(图2C)显示，相对于癌旁正常胰腺组织，PDAC组织中PRLR(棕黄色部分)的表达量更低。</p>
+                </div>
+                <div class="p1">
+                    <p id="235">以上这些结果表明，PRLR在PDAC组织中的表达降低，且PRLR低表达与患者的不良生存关系密切。因此，PRLR可能在PDAC中发挥抑制肿瘤生长的作用。</p>
+                </div>
+<div class="area_img" id="254">
+                        <a class="zoom-in" id="pic1">
+                             <img class="imgPicture" alt='正在加载图片'  data-src="Detail/GetImg?filename=images/ZZLL202106002_25400.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" src="/kxreader/Content/images/buffer.gif" />
+                           
+                        </a>
+                    <p class="img_tit">图<b>1</b> 采用<b>GEO</b>和<b>TCGA</b>数据库分析显示<b>PRLR</b>在<b>PDAC</b>组织中低表达且与患者的不良预后相关  <a class="btn-zoomin" href="Detail/GetImg?filename=images/ZZLL202106002_25400.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"></a><a class="downimg">&nbsp;&nbsp;下载原图</a></p>
+            <p class="img_tit"><b>Fig.1</b><b>Gene Expression Omnibus (GEO) database and The Cancer Genome Atlas (TCGA) databases analysis showed that prolactin receptor (PRLR) were low expressed in pancreatic ductal adenocarcinoma (PDAC) and correlated with poor prognosis.A:Statistics of PRLR expression in GSE102238 (50 cases),GSE15471 (39 cases) and GSE71729 (25 case) databases.GSE102238 and GSE15417 revealed the changes expression level of PRLR mRNA between PDAC tissues and normal tissues;GSE71729 showed the change expression of PRLR mRNA between pancreatic cancer liver metastasis tissues (Met-liver) and normal tissues (Nor-liver).B:The survival analysis of PRLR expression with TCGA database.The group divided by median of PRLR expression.C:Statistics of PRLR expression in GSE33322 database.PanIN:Pancreatic intraepithelial neoplasia;</b><sup>*</sup><b>P</b>&lt;<b>0.05;</b><sup>**</sup><b>P</b>&lt;<b>0.01.</b></p>
+
+</div>
+                <h4 class="anchor-tag" id="236" name="236">2.2 PRLR低表达与胰腺癌细胞耐药性相关</h4>
+                <div class="p1">
+                    <p id="237">为了进一步探讨PRLR与PDAC发展之间的关系，本研究中通过收集获得的TCGA数据库中PDAC患者的数据进行了GSEA分析。将PRLR依据其表达中位数分为低表达组与高表达组并利用KEGG数据库进行基因富集分析。结果(图3A)显示，PRLR低表达与PDAC细胞中JAK-STAT通路、TGF-β通路和Wnt通路的激活相关。有研究表明，Wnt通路可以通过诱导胰腺癌肿瘤细胞上皮-间质转化(epithelial-mesenchymal transition，EMT)，提高活化T细胞核因子2(nuclear factor of activated T cells 2，MFATc2)、微RNA(microRNA，miR)-29a和miR-33a等方式提高胰腺癌对于吉西他滨的耐药性<citation id="320" type="reference"><link href="292" rel="bibliography" /><sup>[<a class="sup">17</a>]</sup></citation>。TGF-β通路也被报道称可以通过促进CYR61的表达来提高PDAC细胞对化疗的耐药性<citation id="321" type="reference"><link href="294" rel="bibliography" /><sup>[<a class="sup">18</a>]</sup></citation>。最后JAK-STAT通路的抑制剂目前也正在被开发作为吉西他滨或者紫杉醇辅助药物以降低胰腺癌的耐药性<citation id="322" type="reference"><link href="296" rel="bibliography" /><sup>[<a class="sup">19</a>]</sup></citation>。</p>
+                </div>
+<div class="area_img" id="255">
+                        <a class="zoom-in" id="pic1">
+                             <img class="imgPicture" alt='正在加载图片'  data-src="Detail/GetImg?filename=images/ZZLL202106002_25500.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" src="/kxreader/Content/images/buffer.gif" />
+                           
+                        </a>
+                    <p class="img_tit">图<b>2</b> 分别采用实时荧光定量<b>PCR</b>法(<b>A</b>)、蛋白质印迹法(<b>B</b>)和免疫组织化学法(<b>C</b>)检测<b>PRLR mRNA</b>和蛋白在<b>PDAC</b>细胞以及肿瘤组织中的表达水平  <a class="btn-zoomin" href="Detail/GetImg?filename=images/ZZLL202106002_25500.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"></a><a class="downimg">&nbsp;&nbsp;下载原图</a></p>
+            <p class="img_tit"><b>Fig.2</b><b>The expression level of prolactin receptor (PRLR) mRNA and protein in pancreatic ductal adenocarcinoma (PDAC) cells (PANC-1 and SW-1900) or PDAC tissue were detected by real-time fluorescent quantitative PCR (A),Western blotting (B) and immunohistochemistry (C,DAB staining,bar</b>=<b>100</b> μ<b>m).Normal pancreatic ductal HPNE cells as the control.</b><sup>*</sup><b>P</b>&lt;<b>0.05;</b><sup>**</sup><b>P</b>&lt;<b>0.01 (n</b>=<b>3).</b></p>
+
+</div>
+                <div class="p1">
+                    <p id="238">利用linkedomics数据库对PRLR进行共表达分析，以找出与PRLR表达相关的基因。结果(图3B)表明，当PRLR表达量下调时，与肿瘤细胞耐药相关的基因谷胱甘肽-S-转移酶P1(glutathione-S-transferase P1，GSPT1)的表达量显著上升<citation id="323" type="reference"><link href="298" rel="bibliography" /><sup>[<a class="sup">20</a>]</sup></citation>，而与降低肿瘤耐药性相关的黏附G蛋白偶联受体V1(adhesion G-protein coupled receptor V1，GPR98)基因的表达量明显下调<citation id="324" type="reference"><link href="300" rel="bibliography" /><sup>[<a class="sup">21</a>]</sup></citation>。</p>
+                </div>
+                <div class="p1">
+                    <p id="239">以上所有结果均提示，PRLR表达量的下降可能会导致PDAC细胞耐药性的升高。</p>
+                </div>
+                <h4 class="anchor-tag" id="240" name="240">2.3 PRLR表达量的下调可提高PDAC细胞的IC<sub>50</sub>值并抑制其凋亡率</h4>
+                <div class="p1">
+                    <p id="241">为了验证PRLR的表达是否与PDAC细胞的耐药性有关。本研究中首先采用shRNA技术沉默SW-1990和PANC-1细胞中PRLR的表达水平。实时荧光定量PCR和蛋白质印迹法检测结果(图4A和图4B)显示，SW-1990和PANC-1细胞中PRLR mRNA(图4A)和蛋白(图4B)的表达水平均明显下调(P均&lt;0.01)。</p>
+                </div>
+                <div class="p1">
+                    <p id="242">吉西他滨是目前胰腺癌治疗的一线化疗药物。采用不同浓度的吉西他滨处理SW-1990和PANC-1细胞后，检测细胞活性并计算IC<sub>50</sub>值。CCK-8法检测结果(图4C)表明，SW-1990细胞中，对照组的IC<sub>50</sub>值为(145.4±12.7)nmol/L，而敲低PRLR表达后(shPRLR组)，IC<sub>50</sub>值上升为(368.5±33.3)nmol/L；PANC-1细胞中，对照组的IC<sub>50</sub>值为(70.0±16.9)nmol/L，而敲低PRLR表达后，IC<sub>50</sub>值上升为(230.6±26.4)nmol/L；与对照组相比差异均有统计学意义(P均&lt;0.01)。这一结果提示，PRLR表达下调能够提高PDAC细胞对吉西他滨的耐药性。</p>
+                </div>
+<div class="area_img" id="256">
+                        <a class="zoom-in" id="pic1">
+                             <img class="imgPicture" alt='正在加载图片'  data-src="Detail/GetImg?filename=images/ZZLL202106002_25600.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" src="/kxreader/Content/images/buffer.gif" />
+                           
+                        </a>
+                    <p class="img_tit">图<b>3</b><b>PRLR</b>低表达与<b>PDAC</b>细胞耐药性相关  <a class="btn-zoomin" href="Detail/GetImg?filename=images/ZZLL202106002_25600.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"></a><a class="downimg">&nbsp;&nbsp;下载原图</a></p>
+            <p class="img_tit"><b>Fig.3</b><b>Low expression of prolactin receptor (PRLR) related with chemotherapy resistance in pancreatic ductal adenocarcinoma (PDAC).A:Gene set enrichment analysis (GSEA) using Kyoto Encyclopedia of Genes and Genomes (KEGG) gene sets was performed to compare the low level expression and high level expression of PRLR in The Cancer Genome Atlas (TCGA) database.NES:Normalized enrichment score;FDR:False discovery rate.B:The co-expression analysis of PRLR with PDAC RNA-sequence data in linkedomics dataset.Result was analyzed by Z-score.</b></p>
+
+</div>
+                <div class="p1">
+                    <p id="244">FCM检测结果(图4D)显示，对照组中PANC-1细胞的凋亡率为(16.28±1.38)%，SW-1990细胞为(19.66±0.94)%；而敲低PRLR表达后，PANC-1细胞的凋亡率为(9.54±1.54)%，SW-1990细胞为(14.92±2.05)%。这一结果提示，沉默PRLR表达可以显著降低PDAC细胞的凋亡水平。</p>
+                </div>
+<div class="area_img" id="332">
+                        <a class="zoom-in" id="pic1">
+                             <img class="imgPicture" alt='正在加载图片'  data-src="Detail/GetImg?filename=images/ZZLL202106002_33200.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" src="/kxreader/Content/images/buffer.gif" />
+                           
+                        </a>
+                    <p class="img_tit">图4 下调PRLR表达对PANC-1和SW-1990细胞IC<sub>50</sub>值和凋亡率的影响  <a class="btn-zoomin" href="Detail/GetImg?filename=images/ZZLL202106002_33200.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"></a><a class="downimg">&nbsp;&nbsp;下载原图</a></p>
+            <p class="img_tit">Fig.4 Effect of down-regulation of prolactin receptor (PRLR) expression on half maximal inhibitory concentration (IC<sub>50</sub>) value and apoptosis rate of pancreatic ductal adenocarcinoma (PDAC) cells (PANC-1 and SW-1900).The expression level of PRLR mRNA (A) and protein (B) in PANC-1 and SW-1990 cells infected with lentivirus carrying shPRLR (targating PRLR geng) were detected by real-time fluorescent quantitative PCR and Western blotting.The cell survival of PANC-1 and SW-1990 cells treatment with different concentrations gemcitabine were detected by CCK-8 method (C) and the apoptosis rate was detected by FCM (D).<sup>*</sup>P&lt;0.05,<sup>**</sup>P&lt;0.01 (n=3).</p>
+
+</div>
+                <div class="p1">
+                    <p id="245">上述结果提示，低表达PRLR可以通过提高PDAC的耐药性和降低胰腺癌细胞的凋亡水平促进PDAC的发展。</p>
+                </div>
+                <h4 class="anchor-tag" id="246" name="246">2.4 下调PRLR表达提高PDAC细胞中G6PD和TKT的表达量</h4>
+                <div class="p1">
+                    <p id="247">为了探究PRLR对提高PDAC细胞系耐药性的机制，进一步利用胰腺癌TCGA数据库的数据进行了分析。对结果进行筛选分析后发现，PRLR mRNA水平与G6PD和TKT的表达量呈负相关(图5A)。G6PD和TKT是磷酸戊糖途径上的2个重要的酶，戊糖磷酸通路可以生成嘧啶类核苷酸从而拮抗吉西他滨，提高肿瘤细胞的耐药性<citation id="325" type="reference"><link href="302" rel="bibliography" /><sup>[<a class="sup">22</a>]</sup></citation>。因此，PRLR可能是通过调控G6PD和TKT来提高细胞对于吉西他滨的耐药性的。</p>
+                </div>
+                <div class="p1">
+                    <p id="248">实时荧光定量PCR和蛋白质印迹法检测结果(图4B和4C)均显示，沉默PRLR表达后，G6PD和TKT的表达量均明显上调(P均&lt;0.01)。由此提示，PRLR是通过提高G6PD和TKT的表达水平来提高细胞耐药性的。</p>
+                </div>
+<div class="area_img" id="258">
+                        <a class="zoom-in" id="pic1">
+                             <img class="imgPicture" alt='正在加载图片'  data-src="Detail/GetImg?filename=images/ZZLL202106002_25800.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" src="/kxreader/Content/images/buffer.gif" />
+                           
+                        </a>
+                    <p class="img_tit">图<b>5</b> 采用<b>TCGA</b>数据分析<b>PRLR</b>与<b>TKT</b>和<b>G6PD mRNA</b>表达的相关相关性(<b>A</b>)以及敲低<b>PRLR</b>表达对<b>PDAC</b>细胞中<b>G6PD</b>和<b>TKT mRNA</b>和蛋白表达水平的影响(<b>B</b>)  <a class="btn-zoomin" href="Detail/GetImg?filename=images/ZZLL202106002_25800.jpg&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"></a><a class="downimg">&nbsp;&nbsp;下载原图</a></p>
+            <p class="img_tit"><b>Fig.5</b><b>Correlation analysis of prolactin receptor (PRLR) with transketolase (TKT) and glucose-6-phosphatedehydrogenase (G6PD) mRNA expression level using The Cancer Genome Atlas (TCGA) database (A) and the effect of knockdown of PRLR expression on G6PD and TKT mRNA and protein expression levels in pancreatic ductal adenocarcinoma (PDAC) cells (PANC-1and SW-1990) were detected by real-time fluorescent quantitative PCR and Western blotting (B).</b><sup>**</sup><b>P</b>&lt;<b>0.01 (n</b>=<b>3).</b></p>
+
+</div>
+                <h3 id="249" name="249" class="anchor-tag"><b>3</b> 讨 论</h3>
+                <div class="p1">
+                    <p id="250">胰腺癌是一种恶程度非常高的肿瘤，其5年生存率长期不到10%。导致这种现象主要原因为胰腺癌早期诊断困难，诊断率低，确诊时患者往往已处于肿瘤中晚期且伴有远端转移<citation id="326" type="reference"><link href="264" rel="bibliography" /><sup>[<a class="sup">3</a>]</sup></citation>。而对于中晚期患者来说，胰腺癌又对化学治疗和放射治疗有着很好的抵抗性，且缺乏高效的靶向药物，治疗效果一直不理想<citation id="327" type="reference"><link href="262" rel="bibliography" /><sup>[<a class="sup">2</a>]</sup></citation>。在胰腺癌中，PDAC所的比例高达90%<citation id="328" type="reference"><link href="304" rel="bibliography" /><sup>[<a class="sup">23</a>]</sup></citation>。因此，研究PDAC发生、发展和耐药机制是十分有必要的。</p>
+                </div>
+                <div class="p1">
+                    <p id="251">PRL在体内调控多种生理功能，如调节胰岛β细胞功能和白棕脂肪的转化等调节代谢，调节压力与肾上腺功能，调节进食与泌乳等<citation id="329" type="reference"><link href="306" rel="bibliography" /><sup>[<a class="sup">24</a>]</sup></citation>。PRLR是PRL的专一性受体，不仅能在生理状态下作为PRL的专一性受体发挥功能，同时也影响着肿瘤的发生和发展。在肺癌和前列腺癌中，PRLR都被作为了潜在治疗靶点，一些针对PRLR的治疗手段正在开发中<citation id="330" type="reference"><link href="308" rel="bibliography" /><sup>[<a class="sup">25</a>]</sup></citation>。本研究中发现，PRLR在胰腺癌中表达量下降，这种下降会导致磷酸戊糖途径中耐药相关基因的上调，从而增加胰腺癌细胞对于吉西他滨的耐药性。同时，PRLR表达量的下降也会降低胰腺癌细胞的凋亡水平。</p>
+                </div>
+                <div class="p1">
+                    <p id="252">磷酸戊糖途径中磷酸戊糖途径是细胞内合成核苷酸的重要方式，其产物5-磷酸核是核苷酸从头合成途径的唯一来源，在细胞DNA合成中发挥重要作用。本研究提示，PRLR能够负调控磷酸戊糖途径中G6PD和TKT的表达水平。胰腺癌细胞通过降低PRLR的表达量，从而提高磷酸戊糖途径的活性，增加细胞嘧啶核苷酸的产量，对吉西他滨这类嘧啶核苷酸类似物药物产生拮抗作用，提高细胞的抗药性。</p>
+                </div>
+                <div class="p1">
+                    <p id="253">综上所述，PRLR可通过调控G6PD和TKT的表达水平调节细胞磷酸戊糖途径从而提高胰腺癌细胞对吉西他滨的耐药性，因此PRLR有望成为胰腺癌分子靶向治疗及预后评估的一个潜在的生物学标志物。</p>
+                </div>
+
+
+<script>
+    //var img_length = $("#pic1  img").length;
+    //var img_length = $(".content .area_img img:not(.pFormula)").length;
+    ////if (img_length <= 1) {
+    ////    var img_start = 0;
+    ////} else {
+    ////    var img_start = 1;
+    ////}
+
+    //var img_start = 0;
+    //懒加载之后看看这块需要怎么兼容
+    //$(".content .area_img img:not(.pFormula)").on("load", function () {
+    //    img_start++;
+    //    if (img_start == img_length) {
+    //        img_start = 0;
+    //        $(".content .area_img img ").each(function (item, index) {
+    //            //var widthCavas = index.naturalWidth / document.body.clientWidth;
+    //            //var ratioHandW = index.naturalWidth / index.naturalHeight;
+    //            //var plusBoth = widthCavas + ratioHandW;
+    //            var item = index.naturalWidth / document.body.clientWidth;
+    //            switch (true) {
+    //                case (item <= (400 / document.body.clientWidth)):
+    //                    index.id = '';
+    //                    break;
+    //                case (item > 400 / document.body.clientWidth && item <= 450 / document.body.clientWidth):
+    //                    index.id = 'magnifiPower12X';
+    //                    break;
+    //                case (item > 450 / document.body.clientWidth && item <= 500 / document.body.clientWidth):
+    //                    index.id = 'magnifiPower15X';
+    //                    break;
+    //                case (item > 500 / document.body.clientWidth && item <= 550 / document.body.clientWidth):
+    //                    index.id = 'magnifiPower17X';
+    //                    break;
+    //                case item > 550 / document.body.clientWidth && item <= 600 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower19X';
+    //                    break;
+    //                case item > 600 / document.body.clientWidth && item <= 650 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower21X';
+    //                    break;
+    //                case item > 650 / document.body.clientWidth && item <= 700 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower25X';
+    //                    break;
+    //                case item > 750 / document.body.clientWidth && item <= 800 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower27X';
+    //                    break;
+    //                case item > 850 / document.body.clientWidth && item <= 900 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower29X';
+    //                    break;
+    //                case item > 900 / document.body.clientWidth && item <= 950 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower31X';
+    //                    break;
+    //                case item > 950 / document.body.clientWidth && item <= 1000 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower36X';
+    //                    break;
+    //                case item > 1000 / document.body.clientWidth && item <= 1050 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower40X';
+    //                    break;
+    //                case item > 1050 / document.body.clientWidth && item <= 1100 / document.body.clientWidth:
+    //                    index.id = 'magnifiPower45X';
+    //                    break;
+    //                case item > 1100 / document.body.clientWidth && item <= 1200 / document.body.clientWidth:
+    //                    index.id = '';
+    //                    break;
+    //                default:
+    //                    index.id = '';
+    //                    break;
+
+    //            }
+    //        })
+    //    } else {
+    //        return;
+    //    }
+    //});
+
+    //图片懒加载
+    //在未触发滚动事件时先判断图片是否已经出现在视窗中，打开页面时先遍历一遍
+    //$(".content .area_img img:not(.pFormula)").each(function () {//在未触发滚动事件时先判断图片是否已经出现在视窗中，打开页面时先遍历一次
+        
+
+    //});
+
+
+
+
+    //$(".content").on('scroll', function (event) {
+    //        var clock;
+    //        debugger
+    //        event.stopPropagation;
+    //        if (clock) {
+    //            clearTimeout(clock);
+    //        }
+    //        clock = setTimeout(function () {
+    //            lazyRender();
+    //            // self.popImgFun();
+    //        }, 100);
+    //    });
+
+    //    var el = $('.content')[0];
+    //if (el.scrollWidth <= el.clientWidth) {
+    //         debugger
+    //        lazyRender();
+    //    }
+
+    //    //懒加载
+    //    function lazyRender() {
+    //        if (checkShow($(this)) && !isLoaded($(this))) {
+    //            /*debugger*/
+    //            loadImg($(this));//加载当前img  } })
+    //                debugger
+    //                $(".content .area_img img:not(.pFormula)").each(function () {//遍历img标签
+    //                    debugger
+    //                    if (checkShow($(this)) && !isLoaded($(this))) {
+    //                        loadImg($(this));//加载当前img
+    //                    }
+    //                })
+
+    //        }
+
+    //    }
+
+    //    function checkShow($img) {     //传入img对象
+    //        debugger
+    //        var scrollTop = $('.content').offset().top;   //即页面向上滚动的距离
+    //        var windowHeight = $('.content').height();     //浏览器自身的高度
+    //        var offsetTop = $img.parent().parent().offset().top;  //目标标签img相对于document顶部的位置
+    //        //对象顶部与文档顶部之间的距离，如果它小于父元素底部与文档顶部的距离，则说明垂直方向上已经进入可视区域了；
+    //        post = offsetTop - (scrollTop + windowHeight);
+    //        //对象底部与文档顶部之间的距离，如果它大于父元素顶部与文档顶部的距离，则说明垂直方向上已经进入可视区域了；
+    //        posb = offsetTop + $img.height() - scrollTop;
+    //        if (post < 0 && posb > 0) {
+    //            return true;
+    //        }
+    //        return false;
+    //    }
+
+    //    function isLoaded($img) {
+    //        debugger
+    //        return $img.attr('data-src') === $img.attr('src'); //如果data-imgurl和src相等那么就是已经加载过了  加载过了就知道了
+    //    }
+
+    //    function loadImg($img) {
+    //        debugger
+    //        /*var str = "Detail/GetImg?filename =" + $img.attr('data-src') + "&uid =" ;*/
+    //        var str = $img.attr('data-src');
+    //        $img.attr('src', str);
+
+    //    }
+
+
+
+</script>
+    <!--brief end-->
+    
+    <!--conten left  end-->
+    <!--增强附件-->
+    
+
+    <!--reference start-->
+        <div class="reference anchor-tag" id="a_bibliography">
+                <h3>参考文献</h3>
+                                    <p id="260">
+                            <a id="bibliography_1" title="SIEGEL R L,MILLER K D,JEMAL A,et al.Cancer statistics,2020[J].CA Cancer J Clin,2020,70(1):7-30."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD4D98D3C0C8FF3B31BEDC3B578580AF99&amp;v=MTgwMDFGcG1hQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9TmlmYmFyZk1GOW00clB4RkYrTjVlbjlMekJkaG4wc09TdzNucXhvd2NiTGxNN09XQ09OdkZTaVdXcjdKSQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[1]</b>
+                                SIEGEL R L,MILLER K D,JEMAL A,et al.Cancer statistics,2020[J].CA Cancer J Clin,2020,70(1):7-30.
+                            </a>
+                        </p>
+                        <p id="262">
+                            <a id="bibliography_2" style="">
+                                    <b>[2]</b>
+                                ZHANG Y F,JIANG S H,HU L P,et al.Targeting the tumor microenvironment for pancreatic ductal adenocarcinoma therapy[J].Chin Clin Oncol,2019,8(2):18.
+                            </a>
+                        </p>
+                        <p id="264">
+                            <a id="bibliography_3" title="KAMISAWA T,ISAWA T,KOIKE M,et al.Hematogenous metastases of pancreatic ductal carcinoma[J].Pancreas.1995,1(4):345-349."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12103002139470&amp;v=MjUxODBDSHM1b0JNVDZUNFBRSC9pclJkR2VycVFUTW53WmVadEZTam1VNy9JSWxvUmFCWT1OaWZiYXJLNkg5SFByNDlIWmVnRw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[3]</b>
+                                KAMISAWA T,ISAWA T,KOIKE M,et al.Hematogenous metastases of pancreatic ductal carcinoma[J].Pancreas.1995,1(4):345-349.
+                            </a>
+                        </p>
+                        <p id="266">
+                            <a id="bibliography_4" style="">
+                                    <b>[4]</b>
+                                KAMISAWA T,WOOD L D,ITOI T,et al.Pancreatic cancer[J].Lancet,2016,388(10039):73-85.
+                            </a>
+                        </p>
+                        <p id="268">
+                            <a id="bibliography_5" style="">
+                                    <b>[5]</b>
+                                XIE F,LING L,VAN DAM H,et al.TGF-β signaling in cancer metastasis[J].Acta Biochim Biophys Sin (Shanghai),2018,50(1):121-132.
+                            </a>
+                        </p>
+                        <p id="270">
+                            <a id="bibliography_6" title="SHAFI A A,YEN A E,WEIGEL N L.Androgen receptors in hormone-dependent and castration-resistant prostate cancer[J].Pharmacol Ther,2013,140(3):223-238."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SFJG&amp;filename=SFJGE2951A185295055398DFCBBABDB021C5&amp;v=MDIyNjFTaVdXcjdKSUZwbWFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdz1OaXZCYWNhNkY5VE4zbzVOWWVrR0NYdzh5aFVhNGtzTE93MlEzV0JCQzdLV1JNbWFDT052Rg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[6]</b>
+                                SHAFI A A,YEN A E,WEIGEL N L.Androgen receptors in hormone-dependent and castration-resistant prostate cancer[J].Pharmacol Ther,2013,140(3):223-238.
+                            </a>
+                        </p>
+                        <p id="272">
+                            <a id="bibliography_7" title="BERNARD V,YOUNG J,CHANSON P,et al.New insights in prolactin:pathological implications[J].Nat Rev Endocrinol,2015,11(5):265-275."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPDBFC7EE9694F64687DC05CA7BBAC9EB93&amp;v=MDczMTFoTjdPY0NPTnZGU2lXV3I3SklGcG1hQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9TmlmYmFzSE9iZGE1Mm9aRGJlOTVDbmcveHhGbm1UOTRPdzdsM21CRUNydg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[7]</b>
+                                BERNARD V,YOUNG J,CHANSON P,et al.New insights in prolactin:pathological implications[J].Nat Rev Endocrinol,2015,11(5):265-275.
+                            </a>
+                        </p>
+                        <p id="274">
+                            <a id="bibliography_8" title="GOFFIN V,BINART N,TOURAINE P,et al.Prolactin:the new biology of an old hormone[J].Annu Rev Physiol,2002,64:47-67."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SARD&amp;filename=SARD00000022865&amp;v=MDE0NDRyeG94Y01IN1I3cWRaT2R0RnlqbFVidk5JbG89Tml6WmFyTzRIdEhNcjQxSGJPMEtZM2s1ekJkaDRqOTlTWHFS&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[8]</b>
+                                GOFFIN V,BINART N,TOURAINE P,et al.Prolactin:the new biology of an old hormone[J].Annu Rev Physiol,2002,64:47-67.
+                            </a>
+                        </p>
+                        <p id="276">
+                            <a id="bibliography_9" title="SWAMINATHAN G,VARGHESE B,FUCHS S Y.Regulation of prolactin receptor levels and activity in breast cancer[J].J Mammary Gland Biol Neoplasia,2008,13(1):81-91."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD13031200655765&amp;v=MjkxNzBZPU5pZmJhcks3SHRMTnJZOUZZdTRLQzNvOG9CTVQ2VDRQUUgvaXJSZEdlcnFRVE1ud1plWnRGU2ptVTcvSUlsb1JhQg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[9]</b>
+                                SWAMINATHAN G,VARGHESE B,FUCHS S Y.Regulation of prolactin receptor levels and activity in breast cancer[J].J Mammary Gland Biol Neoplasia,2008,13(1):81-91.
+                            </a>
+                        </p>
+                        <p id="278">
+                            <a id="bibliography_10" title="BOLE-FEYSOT C,GOFFIN V,EDERY M,et al.Prolactin (PRL) and its receptor:actions,signal transduction pathways and phenotypes observed in PRL receptor knockout mice[J].Endocr Rev,1998,19(3):225-268."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12102800595817&amp;v=MTkwMTBkR2VycVFUTW53WmVadEZTam1VNy9JSWxvUmFCWT1OaWZiYXJLNkg5SE9wNDlGWWVJS0JIMCtvQk1UNlQ0UFFIL2lyUg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[10]</b>
+                                BOLE-FEYSOT C,GOFFIN V,EDERY M,et al.Prolactin (PRL) and its receptor:actions,signal transduction pathways and phenotypes observed in PRL receptor knockout mice[J].Endocr Rev,1998,19(3):225-268.
+                            </a>
+                        </p>
+                        <p id="280">
+                            <a id="bibliography_11" title="MILLER S L,DEMARIA J E,FREIER D O,et al.Novel association of VAV2 and NEK3 modulates signaling through the human prolactin receptor[J].Mol Endocrinol,2005,19(4):939-949."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12102400765905&amp;v=MDI1MThmYmFySzZIOUhPcTQ5RlkrMEtCWHc4b0JNVDZUNFBRSC9pclJkR2VycVFUTW53WmVadEZTam1VNy9JSWxvUmFCWT1OaQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[11]</b>
+                                MILLER S L,DEMARIA J E,FREIER D O,et al.Novel association of VAV2 and NEK3 modulates signaling through the human prolactin receptor[J].Mol Endocrinol,2005,19(4):939-949.
+                            </a>
+                        </p>
+                        <p id="282">
+                            <a id="bibliography_12" style="">
+                                    <b>[12]</b>
+                                TANDON M,COUDRIET G M,CRISCIMANNA A,et al.Prolactin promotes fibrosis and pancreatic cancer progression[J].Cancer Res,2019,79(20):5316-5327.
+                            </a>
+                        </p>
+                        <p id="284">
+                            <a id="bibliography_13" title="HEINEMANN V,WILKE H,MERGENTHALER H G,et al.Gemcitabine and cisplatin in the treatment of advanced or metastatic pancreatic cancer[J].Ann Oncol,2000,11(11):1399-1403."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12090404392176&amp;v=MjEyOTVNcTQ5QlorSU5EWHMvb0JNVDZUNFBRSC9pclJkR2VycVFUTW53WmVadEZTam1VNy9JSWxvUmFCWT1OaWZiYXJLNkh0ag==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[13]</b>
+                                HEINEMANN V,WILKE H,MERGENTHALER H G,et al.Gemcitabine and cisplatin in the treatment of advanced or metastatic pancreatic cancer[J].Ann Oncol,2000,11(11):1399-1403.
+                            </a>
+                        </p>
+                        <p id="286">
+                            <a id="bibliography_14" title="DE SOUSA CAVALCANTE L,MONTEIRO G.Gemcitabine:metabolism and molecular mechanisms of action,sensitivity and chemoresistance in pancreatic cancer[J].Eur J Pharmacol,2014,741:8-16."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJES&amp;filename=SJES14110600039129&amp;v=MTMzOTJhQlk9TmlmT2ZiSzhIOURNcVk5RlpPZ0dEWDR3b0JNVDZUNFBRSC9pclJkR2VycVFUTW53WmVadEZTam1VNy9JSWxvUg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[14]</b>
+                                DE SOUSA CAVALCANTE L,MONTEIRO G.Gemcitabine:metabolism and molecular mechanisms of action,sensitivity and chemoresistance in pancreatic cancer[J].Eur J Pharmacol,2014,741:8-16.
+                            </a>
+                        </p>
+                        <p id="288">
+                            <a id="bibliography_15" title="贾振忠，霍景山.胰腺癌的病理分型及临床特点[J].山东医药，2000(22):52-53."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=CJFD&amp;filename=SDYY200022060&amp;v=MjQwMDc0SHRIT3JZOURaSVFLREg4NHZSNFQ2ajU0TzN6cXFCdEdGckNVUjdtZVplZHVGeXJoVnIzTU5pblNkN0c=&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[15]</b>
+                                贾振忠，霍景山.胰腺癌的病理分型及临床特点[J].山东医药，2000(22):52-53.
+                            </a>
+                        </p>
+                        <p id="290">
+                            <a id="bibliography_16" title="VASAIKAR S V,STRAUB P,WANG J,et al.LinkedOmics:analyzing multi-omics data within and across 32 cancer types[J].Nucleic Acids Res,2018,46(D1):D956-D963."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD7B66EC275E5CC43F6E831BDE3ADF2CB6&amp;v=Mjc0NTNSRkVEY1NXTnNpWkNPTnZGU2lXV3I3SklGcG1hQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9TmlmYmFyVEtHTmU1M0kxQ1laNEtmdzg5ekdBVm56ZCtTUTJXMg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[16]</b>
+                                VASAIKAR S V,STRAUB P,WANG J,et al.LinkedOmics:analyzing multi-omics data within and across 32 cancer types[J].Nucleic Acids Res,2018,46(D1):D956-D963.
+                            </a>
+                        </p>
+                        <p id="292">
+                            <a id="bibliography_17" title="RAM MAKENA M,GATLA H,VERLEKAR D,et al.Wnt/β-catenin signaling:the culprit in pancreatic carcinogenesis and therapeutic resistance[J].Int J Mol Sci,2019,20(17):4242."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJMD&amp;filename=SJMD3FE8EFD1BDC0E7B5D411E694BDCAB1C1&amp;v=MDQ0NTVCQ3NQbVJNbWVDT052RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZkdhckRPYTltNTJmdEVGcDk4REFrK3ZSTm43ajU4UFhucnFHQg==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[17]</b>
+                                RAM MAKENA M,GATLA H,VERLEKAR D,et al.Wnt/β-catenin signaling:the culprit in pancreatic carcinogenesis and therapeutic resistance[J].Int J Mol Sci,2019,20(17):4242.
+                            </a>
+                        </p>
+                        <p id="294">
+                            <a id="bibliography_18" title="HESLER R A,HUANG J J,STARR M D,et al.TGF-β-induced stromal CYR61 promotes resistance to gemcitabine in pancreatic ductal adenocarcinoma through downregulation of the nucleoside transporters hENT1 and hCNT3[J].Carcinogenesis,2016,37(11):1041-1051."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD00E84981B1881FCECE06F8DC5A26BCF3&amp;v=MjU3MzJhQnVIWWZPR1FsZkJyN1EzNTloaHhyeTZ3cXc9TmlmYmFyTzRhOW5JcG9kRUZ1b0hCSDFQdkdOZ256OTdQbmVXM3hkRWU3VG1Oc3ljQ09OdkZTaVdXcjdKSUZwbQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[18]</b>
+                                HESLER R A,HUANG J J,STARR M D,et al.TGF-β-induced stromal CYR61 promotes resistance to gemcitabine in pancreatic ductal adenocarcinoma through downregulation of the nucleoside transporters hENT1 and hCNT3[J].Carcinogenesis,2016,37(11):1041-1051.
+                            </a>
+                        </p>
+                        <p id="296">
+                            <a id="bibliography_19" title="VON AHRENS D,BHAGAT T D,NAGRATH D,et al.The role of stromal cancer-associated fibroblasts in pancreatic cancer[J].J Hematol Oncol,2017,10(1):76."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD651CD296D57308706597B00EF33E1E4C&amp;v=MTczNjFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdz1OaWZiYXJXOUg2SzRyWVpERU80SUQzd3h5QllWN3paNk9uL2kyV1EyZXNlVk1MN3NDT052RlNpV1dyN0pJRnBtYQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[19]</b>
+                                VON AHRENS D,BHAGAT T D,NAGRATH D,et al.The role of stromal cancer-associated fibroblasts in pancreatic cancer[J].J Hematol Oncol,2017,10(1):76.
+                            </a>
+                        </p>
+                        <p id="298">
+                            <a id="bibliography_20" title="FRUEHAUF J P,BREM H,BREM S,et al.In vitro drug response and molecular markers associated with drug resistance in malignant gliomas[J].Clin Cancer Res,2006,12(15):4523-4532."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD12102300430977&amp;v=MDY1NTVUNlQ0UFFIL2lyUmRHZXJxUVRNbndaZVp0RlNqbVU3L0lJbG9SYUJZPU5pZmJhcks2SDlIT3JJOUZZT2dQQlhzK29CTQ==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[20]</b>
+                                FRUEHAUF J P,BREM H,BREM S,et al.In vitro drug response and molecular markers associated with drug resistance in malignant gliomas[J].Clin Cancer Res,2006,12(15):4523-4532.
+                            </a>
+                        </p>
+                        <p id="300">
+                            <a id="bibliography_21" title="付强，成静，张金岱，等.MiR-145调节G蛋白偶联受体98抑制结直肠癌细胞的奥沙利铂耐药性[J].中华胃肠外科杂志，2017,20(5):566-573."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=CJFD&amp;filename=ZWCW201705027&amp;v=MjM3NjJySWViRzRIOWJNcW85SFk0UUtESDg0dlI0VDZqNTRPM3pxcUJ0R0ZyQ1VSN21lWmVkdUZ5cmhWcjNNUHo=&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[21]</b>
+                                付强，成静，张金岱，等.MiR-145调节G蛋白偶联受体98抑制结直肠癌细胞的奥沙利铂耐药性[J].中华胃肠外科杂志，2017,20(5):566-573.
+                            </a>
+                        </p>
+                        <p id="302">
+                            <a id="bibliography_22" title="SHUKLA S K,PUROHIT V,MEHLA K,et al.MUC1 and HIF-1alpha signaling crosstalk induces anabolic glucose metabolism to impart gemcitabine resistance to pancreatic cancer[J].Cancer Cell,2017,32(1):71-87.e7."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJES&amp;filename=SJES5A16D1C269A20F53C46BB8C3C2165E79&amp;v=MjY3MDFueFB5aFZnN2prUE9uZVJyMkUzZUxTUk1MMldDT052RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZk9mYmJKSDllNHJ2eEhZdUorRA==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[22]</b>
+                                SHUKLA S K,PUROHIT V,MEHLA K,et al.MUC1 and HIF-1alpha signaling crosstalk induces anabolic glucose metabolism to impart gemcitabine resistance to pancreatic cancer[J].Cancer Cell,2017,32(1):71-87.e7.
+                            </a>
+                        </p>
+                        <p id="304">
+                            <a id="bibliography_23" title="HIDALGO M,CASCINU S,KLEEFF J,et al.Addressing the challenges of pancreatic cancer:future directions for improving outcomes[J].Pancreatology,2015,15(1):8-18."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJES&amp;filename=SJESA14420172AF4D90C6B2450B88A5C17B6&amp;v=MDc0NThLNUd0WE9yNDVDWnBwNUNBZ3d6MlVWbUQxNVRYK1FwQnBFZk1HVlFzaVpDT052RlNpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZk9mYw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[23]</b>
+                                HIDALGO M,CASCINU S,KLEEFF J,et al.Addressing the challenges of pancreatic cancer:future directions for improving outcomes[J].Pancreatology,2015,15(1):8-18.
+                            </a>
+                        </p>
+                        <p id="306">
+                            <a id="bibliography_24" title="BERNARD V,YOUNG J,BINART N.Prolactin-a pleiotropic factor in health and disease[J].Nat Rev Endocrinol,2019,15(6):356-365."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPDD06955F9BB24CC42FF85223E4BD37E7A&amp;v=MTI0NzRpV1dyN0pJRnBtYUJ1SFlmT0dRbGZCcjdRMzU5aGh4cnk2d3F3PU5pZmJhc2U0R05qSnF2bE1GcGtOQ0E5S3l4UmxuRGQ0U24zaDJSWkhEYkdUTUwzdUNPTnZGUw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[24]</b>
+                                BERNARD V,YOUNG J,BINART N.Prolactin-a pleiotropic factor in health and disease[J].Nat Rev Endocrinol,2019,15(6):356-365.
+                            </a>
+                        </p>
+                        <p id="308">
+                            <a id="bibliography_25" title="ZHOU Y,ZONG H,HAN L,et al.A novel bispecific antibody targeting CD3 and prolactin receptor (PRLR) against PRLR-expression breast cancer[J].J Exp Clin Cancer Res,2020,39(1):87."  target="_blank" href="/kcms/detail/detail.aspx?dbcode=SJPD&amp;filename=SJPD1B379CD61D9AEB2B77150E6D15357163&amp;v=MTk1OTU9TmlmYmFyTEtIZGJGM1B0RFpaOEdmUWxMeldRVTdUNTRTQXJrMkJNd2VyZVRSTHljQ09OdkZTaVdXcjdKSUZwbWFCdUhZZk9HUWxmQnI3UTM1OWhoeHJ5Nndxdw==&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!"  style="color:#000">
+
+                                    <b>[25]</b>
+                                ZHOU Y,ZONG H,HAN L,et al.A novel bispecific antibody targeting CD3 and prolactin receptor (PRLR) against PRLR-expression breast cancer[J].J Exp Clin Cancer Res,2020,39(1):87.
+                            </a>
+                        </p>
+        </div>
+    <!--reference end-->
+    <!--footnote start-->
+    <!--footnote end-->
+
+
+
+</div>
+
+
+
+<script type="text/javascript">
+      console.log(""+"肿瘤");
+       console.log("Year"+"2021");
+     console.log("Issue"+"06");
+     console.log("Volume"+"41");
+     console.log("PageNum"+"383-393");
+       console.log("PYKM"+"ZZLL");
+     console.log("DOI" + "")
+      //设置15s之后展示猫头鹰  从某一个时间开始计时
+
+    //精读
+    //当前时间
+
+    function clickJd() {
+        document.cookie.split(";").forEach(function (item, index) {
+            if (item.split('=')[0] == ' Ecp_LoginStuts') {
+                var array = JSON.parse(item.split("=")[1]);
+                for (var obj in array) {
+                    //UserType == "bk"为存机构登录 
+                    //console.log(array[obj])
+                    window.UserType = array["UserType"];
+                    //BUserName == "" 就是个人账户
+                    window.BUserType = array["BUserType"];
+                }
+            }
+
+        });
+
+        if (!!window.UserType && window.UserType == "jf") {
+            //存个人
+            if (!window.BUserType && window.BUserType =="") {
+                window.open(window.yanxueUrl, "_self");
+            } else {
+                //机构+个人
+                var promotObject = {};
+                promotObject.promptName = "精读";
+                promotObject.promotContent = "进入知网研学平台，可对本文进行划线、笔记、摘录等操作，帮助您深入理解文章内容。";
+                baseMain.promptLayer(promotObject);
+            }
+        } else {
+            //存机构
+               baseMemerOffline.Clientip = '59.66.132.21';
+                baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+                baseMemerOffline.message = "";
+                baseMemerOffline.url = window.yanxueUrl;
+                baseMemerOffline.lang = "zh";
+                baseMemerOffline.regshow = false;
+                baseMemerOffline.phone = "";
+                baseMemerOffline.sourcelogincon.librarysource = 0;
+                baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+                baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+                baseMemerOffline.sourcelogincon.Token = window.Lid;
+                baseMemerOffline.sourcelogincon.DoubleLogin = true;
+                baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+                baseMemerOffline.loginshow = true;
+                baseMemerOffline.GLSearchType = "精读";
+                baseMemerOffline.GLSearchContent = "个人账号登录后，阅读文章时可进行划线、笔记、摘录等操作，帮助您深入理解文章内容。";
+                baseMemerOffline.commentsContent = "注：该功能仅对个人账号登录用户开放，请登录个人账号使用。";
+                baseMemerOffline.GLSearchCopyShow = true;
+                // 点击鼠标先隐藏按钮
+                var obj = $("#GLSearch");
+                obj.css("display", "none");
+
+        }
+
+    }
+
+    function clickSc() {
+
+        document.cookie.split(";").forEach(function (item, index) {
+            if (item.split('=')[0] == ' Ecp_LoginStuts') {
+                var array = JSON.parse(item.split("=")[1]);
+                for (var obj in array) {
+                    //UserType == "bk"为存机构登录 
+                    //console.log(array[obj])
+                    window.UserType = array["UserType"];
+                    //BUserName == "" 就是个人账户
+                    window.BUserType = array["BUserType"];
+                }
+            }
+
+        });
+        if (!!window.UserType && window.UserType == "jf") {
+            //存个人
+            if (!window.BUserType && window.BUserType =="") {
+                window.open(window.yanxueUrl, "_self");
+            } else {
+                //机构+个人
+                var promotObject = {};
+                promotObject.promptName = "收藏";
+                promotObject.promotContent = "进入知网研学平台，可将本文收藏至个人学习专题。";
+                baseMain.promptLayer(promotObject);
+            }
+        } else {
+            //存机构
+                baseMemerOffline.Clientip = '59.66.132.21';
+            baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+            baseMemerOffline.message = "";
+            baseMemerOffline.url = window.yanxueUrl;
+            baseMemerOffline.lang = "zh";
+            baseMemerOffline.regshow = false;
+            baseMemerOffline.phone = "";
+            baseMemerOffline.sourcelogincon.librarysource = 0;
+            baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+            baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+            baseMemerOffline.sourcelogincon.Token = window.Lid;
+            baseMemerOffline.sourcelogincon.DoubleLogin = true;
+            baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+            baseMemerOffline.loginshow = true;
+            baseMemerOffline.GLSearchType = "收藏";
+            baseMemerOffline.GLSearchContent = "个人账号登录后，可将本文收藏至个人学习专题。";
+            baseMemerOffline.commentsContent = "注：该功能仅对个人账号登录用户开放，请登录个人账号使用。";
+            baseMemerOffline.GLSearchCopyShow = true;
+            // 点击鼠标先隐藏按钮
+
+            var obj = $("#GLSearch");
+            obj.css("display", "none");
+
+        }
+    }
+
+
+    
+    var mainContent = new Vue({
+        el: "#mainContent",
+        data: {
+            mainContentShow: 'false',
+            mainContentName: "清华大学图书馆",
+            indiAccountShow: !("" && "1") === true ? true : false,
+            UserRealName: "清华大学图书馆",
+            pNt: '',
+            IsOrgUser: !(window.UserType == "jf" && window.BUserType == "") ? true:false   //猫头鹰是机构账号就显示，不是就不显示。
+        },
+
+        created: function () {
+            performance.navigation.type = 0;
+            this.pNt = localStorage.getItem('locationHash');
+            if (performance.navigation.type == 1 && this.pNt !== null) {
+                localStorage.setItem("locationHash", '43424');
+                this.pNt = localStorage.getItem('locationHash');
+            } else if (performance.navigation.type == 0 && this.pNt !== '' && this.pNt !== null) {
+                this.pNt = localStorage.getItem('locationHash');
+
+            } else if (performance.navigation.type == 0 && this.pNt == null || this.pNt == "") {
+                this.pNt = localStorage.getItem('locationHash');
+            }
+
+            //刷新的时候不出现猫头鹰，这个功能现在先屏蔽
+            //qinqi
+            if (document.cookie.indexOf("username=123") == -1) {
+                this.mainContentShow = false;
+
+                //首次打开就弹，不是首次打开就不弹---测试的时候设置少点的时间就可以了----这块的首次打开时间还得需要设置一下，设置一个范围时间点再次能够进来
+            } else {
+                //alert("再次打开！");
+                this.mainContentShow = false;
+
+            }
+
+			 //初始化的时候这个true有条件的
+
+
+        },
+
+        watch: {
+            pNt: function (val) {
+                if ((val !== '' && val !==null &&(performance.navigation.type == 1 || performance.navigation.type == 0))){
+                    this.mainContentShow = false;
+                    this.pNt = "";
+                    //localStorage.setItem("locationHash", '');
+                    window.localStorage.removeItem('locationHash');
+                }
+            }
+        },
+        methods: {
+           //非个人登录框弹出关闭功能
+            clickClosePop: function () {
+              this.mainContentShow=false;
+            },
+
+           //点击登录出现登录框
+            clickLogin: function () {
+                document.cookie.split(";").forEach(function (item, index) {
+                    if (item.split('=')[0] == ' Ecp_LoginStuts') {
+                        var array = JSON.parse(item.split("=")[1]);
+                        for (var obj in array) {
+                            //UserType == "bk"为存机构登录 
+                            //console.log(array[obj])
+                            window.UserType = array["UserType"];
+                            //BUserName == "" 就是个人账户
+                            window.BUserType = array["BUserType"];
+                        }
+                    }
+
+                });
+                //存粹机构
+                if (!!window.UserType && window.UserType == "bk") {
+                    this.mainContentShow = false;
+                    baseMemerOffline.Clientip = '59.66.132.21';
+                    baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+                    baseMemerOffline.message = "";
+                    baseMemerOffline.url = window.yanxueUrl;
+                    baseMemerOffline.lang = "zh";
+                    baseMemerOffline.regshow = false;
+                    baseMemerOffline.phone = "";
+                    baseMemerOffline.sourcelogincon.librarysource = 0;
+                    baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+                    baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+                    baseMemerOffline.sourcelogincon.Token = window.Lid;
+                    baseMemerOffline.sourcelogincon.DoubleLogin = true;
+                    baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+                    baseMemerOffline.loginshow = true;
+                    baseMemerOffline.GLSearchCopyShow = false;
+                } else {
+                    if (!window.BUserType && window.BUserType !== "") {
+                        //机构+个人
+                        var promotObject = {};
+                        promotObject.promptName = "登录";
+                        promotObject.promotContent = "进入知网研学平台，可对本文进行划线、笔记、摘录等操作，帮助您深入理解文章内容。";
+                        baseMain.promptLayer(promotObject);
+                    }
+                }
+            },
+
+            clickLoginShow: function () {
+                //初始化的时候这个true有条件的
+                 //初始化的时候这个true有条件的
+
+                this.mainContentShow = false;
+
+                //
+                var user = 'username';
+                var value = '123';
+                var exp = new Date();
+                exp.setTime(exp.getTime() + 604800000);//过期时间 7天
+                document.cookie = user + "=" + escape(value) + ";expires=" + exp.toGMTString();
+                console.log(user + "=" + escape(value) + ";expires=" + exp.toGMTString());
+                //开始倒计时
+
+            },
+
+
+
+        },
+
+    });
+
+
+    var basePromption = new Vue({
+        el: "#promptBox",
+        data: {
+            promptShow: false,
+
+        },
+
+        created: function () {
+            //前边点开也会在这里消失
+            //if (document.cookie.indexOf("username=nihaoya") == -1) {
+            //    this.promptShow = true;
+            //}
+
+        },
+        methods: {
+
+            clickPromptShow: function () {
+                var _this = this;
+                _this.promptShow = false;
+                var user = 'username2';
+                var value = 'nihaoya';
+                var exp = new Date();
+                exp.setTime(exp.getTime() + 604800000);//过期时间 7天
+                document.cookie = user + "=" + escape(value) + ";expires=" + exp.toGMTString();
+            }
+
+        }
+    });
+
+</script>
+        <input id="fileid" type="hidden" value="ZZLL202106002" />
+        <input id="dpi" type="hidden" value="300" />
+    </div>
+
+<script>
+    //var _hmt = _hmt || [];
+    //(function () {
+    //    var hm = document.createElement("script");
+    //    hm.src = "https://hm.baidu.com/hm.js?6e967eb120601ea41b9d312166416aa6";
+    //    var s = document.getElementsByTagName("script")[0];
+    //    s.parentNode.insertBefore(hm, s);
+    //})();
+</script>
+
+    
+
+
+
+<input id="hid_uid" name="hid_uid" type="hidden" value="WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!" />
+<input id="hid_kLogin_headerUrl" name="hid_kLogin_headerUrl" type="hidden" value="/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F" />
+<input id="hid_kLogin_footerUrl" name="hid_kLogin_footerUrl" type="hidden" value="/KLogin/Request/GetKFooter.ashx%3Fcallback%3D%3F" />
+
+
+
+
+
+
+<script src="/kxreader/Scripts/HowNetEncryptionService.js?v=20231117"></script>
+<script src="/kxreader/Scripts/annotator.js?v=20230605"></script>
+<script src="https://picx.cnki.net/kxreader/jquery.fly.min.js" type="text/javascript"></script>
+
+<script src="/kxreader/Scripts/render.js?v=20220105"></script>
+
+
+<div id="ueditorId" style="display:none">
+    <div class="tag-wrap">
+        <script id="editor" name="editor" type="text/plain">
+        </script>
+        
+        <sign-label v-if="isShowSignFlag" v-bind:parameter="signLabelOption"></sign-label>
+    </div>
+</div>
+
+
+
+
+
+<div class="btn-link" style="display: none"><a target="_blank" href="/kcms/detail/detail.aspx?dbcode=CJFQ&amp;filename=ZZLL202106002&amp;v=MTQ0NDRSN21lWmVkdUZ5cmhWcjNNUHpmSFlyRzRITkRNcVk5RlpvUUtESDg0dlI0VDZqNTRPM3pxcUJ0R0ZyQ1U=&amp;uid=WEEvREcwSlJHSldSdmVqMDh6c3ZOU25pbnBySEJiMXF6Q0xFWWZhbHFRaz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!">知网节</a></div>
+<div class="popflow" id="popupTips" style="display: none;">
+    <div class="popflowArr"></div>
+    <div class="popflowCot">
+        <div class="hd"><a href="javascript:void(0);" onclick="$('#popupTips').hide();$('#popupmsg').html('')" class="close">X</a></div>
+        <div class="bd">
+            <p class="mes" id="popupmsg" name="popupmsg"></p>
+            
+        </div>
+    </div>
+</div>
+<input type="hidden" id="myexport" value="//kns.cnki.net" />
+
+<input type="hidden" id="KPCAPIPATH" value="//ishufang.cnki.net" />
+<input type="hidden" id="CitedTimes" value="0" />
+
+
+<div id="readlogin" v-if="loginshow" v-cloak>
+    <div class="read-login" v-show="loginshow" v-cloak>
+        <div class="read-login-tip" v-show="loginshow&&GLSearchCopyShow">
+            <h1>【{{GLSearchType}}】说明：</h1>
+            <p>{{GLSearchContent}}</p>
+            <p class="read-login-c10">{{ commentsContent}}</p>
+        </div>
+        <login-reg v-bind:Clientip="Clientip" v-bind:ssoappid="ssoappid"
+                   v-bind:loginshow="loginshow" v-bind:url="url" v-bind:lang="lang" v-bind:message="message"
+                   v-bind:regshow="regshow" v-bind:phone="phone" v-bind:sourcelogincon="sourcelogincon" v-on:closelogin="closelogin">
+        </login-reg>
+    </div>
+    <div class="read-shaw" v-show="loginshow"></div>
+</div>
+
+<div class="link" id="GLSearch" style="display: none;">
+    <i class="icon-trangle"></i>
+    
+    <div class="inner">
+        
+        <a class="links" id="correct2">划线</a>
+        <a class="links" id="highLight2">高亮</a>
+        <a class="links" id="addnote2">笔记</a>
+        <a class="links" id="addcentor2">摘录</a>
+        <button class="referenceBook" id="referenceBook">工具书</button>
+        <button class="copytextClass" id="copytext">复制</button>
+    </div>
+</div>
+
+
+
+
+
+<script src="/kxreader/bundles/detail?v=Npvp2ysEgLlVmMy11xCiXM0TwXW1QYoubDMgsW-g_UY1"></script>
+
+<input id="hidVirtualPath" name="hidVirtualPath" type="hidden" value="" />
+<script src="/kxreader/Scripts/kxr.js?v=20220520"></script>
+<script src="/kxreader/Scripts/kxr.refer.js?v=20220520"></script>
+<script src="/kxreader/Scripts/kxr.detail.js?v=20220520"></script>
+<script src="/kxreader/Scripts/kxr.detail.header.js?v=20231117"></script>
+<script src="/kxreader/Scripts/kxr.detail.ref.js?v=20220520"></script>
+<script src="/kxreader/Scripts/kxr.detail.btns.js?v=20220929"></script>
+<script src="/kxreader/Scripts/jquery.twbsPagination.js"></script>
+<script src="/kxreader/Scripts/clipboard.min.js"></script>
+<script src="/kxreader/Scripts/layer.min.js" type="text/javascript"></script>
+
+<div>
+    <div class="footer">
+        <div class="foot-top">
+            <ul class="footcontent">
+                <li>
+                    <b>读者服务</b>
+                    <a target="_blank" href="http://vipcard.cnki.net/ec/skwd/skwd.htm">购买知网卡</a>
+                    <a target="_blank" href="http://zhifu.cnki.net/">充值中心</a>
+                    <a target="_blank" href="http://my.cnki.net/">我的CNKI</a>
+                    <a target="_blank" href="http://service.cnki.net/helpcenter/">帮助中心</a>
+                </li>
+                <li>
+                    <b>CNKI常用软件下载</b>
+                    <a target="_blank" href="https://cajviewer.cnki.net">CAJViewer浏览器</a>
+                    <a target="_blank" href="https://estudy.cnki.net/">知网研学（原E-Study）</a>
+                    <a target="_blank" href="https://www.cnki.net/software/xzydq.htm">下载中心</a>
+                    <a target="_blank" href="https://piccache.cnki.net/2022/kdn/software/standardreader.exe">标准阅读器</a>
+                </li>
+                <li>
+                    <b>特色服务</b>
+                    <a target="_blank" href="https://wap.cnki.net/cnkiclient.aspx">手机知网</a>
+                    <a target="_blank" href="https://zwwh.cnki.net/">知网文化</a>
+                    <a target="_blank" href="https://mall.cnki.net/">知网阅读</a>
+                    <a target="_blank" href="https://bianke.cnki.net/">编创服务</a>
+                </li>
+                <li>
+                    <b>客服咨询</b>
+                    <span>订卡热线：400-819-9993</span>
+                    <span>服务热线：400-810-9888</span>
+                    <span>在线咨询：<a target="_blank" href="http://help.cnki.net">help.cnki.net</a></span>
+                    <span>邮件咨询：<a target="_blank" href="mailto:help@cnki.net">help@cnki.net</a></span>
+                </li>
+                <li class="weibo">
+                    <a target="_blank" href="https://weibo.com/u/3059308095">
+                        <img src="//piccache.cnki.net/2022/kdn/index/nvsm/nimages/logo_xl.png" alt="新浪微博客服">
+                        <span>新浪微博客服</span>
+                    </a>
+                    <a class="qrcode" href="javascript:void(0)">
+                        <img src="//piccache.cnki.net/2022/kdn/index/kns7/nimages/logo_wx.png" alt="官方微信">
+                        <span>官方微信</span>
+                        <span class="wechat-qrcode">
+                          <img src="//piccache.cnki.net/2022/kdn/index/kns8/nimages/qrcode.jpg" alt="官方微信">
+                      </span>
+                    </a>
+                </li>
+            </ul>
+            
+        </div>
+        <div class="foot-bot clearfix">
+            <div class="t">
+                <img src="//piccache.cnki.net/2022/kdn/index/nvsm/nimages/foot-logo.png" alt="中国知网">
+                <p class="mid">
+                    <span>
+                        <a target="_blank" href="http://cnki.net/gycnki/gycnki.htm">关于我们</a>
+                        <a target="_blank" href="http://www.cnki.net/other/gonggao/gongsirongyu.html">CNKI 荣誉</a>
+                        <a target="_blank" href="http://www.cnki.net/other/gonggao/bqsm.htm">版权公告</a>
+                        <a target="_blank" href="http://service.cnki.net/">客服中心</a>
+                        <a target="_blank" href="http://help.cnki.net/">在线咨询</a>
+                        <a target="_blank" href="http://help.cnki.net/Live800_2_2.aspx">用户建议</a>
+                        <a target="_blank" href="//piccache.cnki.net/2022/index/CNKIRecruit/index.html">知网招聘</a>
+                        <a target="_blank" href="http://a.cnki.net/">知网推广</a>
+                    </span>
+                    <span id="copyright">© 1998-2023 中国知网（CNKI）</span>
+                </p>
+                <p class="right">
+                    <!--可信网站图片LOGO安装开始-->
+                    <a id="___szfw_logo___" href="https://ss.knet.cn/verifyseal.dll?sn=e13111111010043364isll000000&amp;a=1&amp;pa=0.08881110103584755" target="_blank">
+                        <img alt="可信网站" src="//piccache.cnki.net/2022/kdn/index/nvsm/nimages/kxwz.jpg" height="33" width="86">
+                    </a>
+                    <!--可信网站图片LOGO安装结束-->
+                    <!--诚信网站图片LOGO安装开始-->
+
+                    <script type="text/javascript">(function () { document.getElementById('___szfw_logo___').oncontextmenu = function () { return false; } })();</script>
+                    <!--诚信网站图片LOGO安装结束-->
+                </p>
+            </div>
+            <div class="b">
+                <span>京 ICP 证 040431 号<a target="_blank" href="//piccache.cnki.net/2022/index/images/gb/271.jpg">网络出版服务许可证 (总)网出证(京)字第 271 号</a> 京公网安备 11010802020460 号</span>
+                <span>《中国学术期刊（光盘版）》电子杂志社有限公司</span>
+                <span>KDN 平台基础技术由 KBASE 11.0 提供.</span>
+            </div>
+        </div>
+        <!--foot-bot-->
+    </div>
+</div>
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+   <div class="abstract-wrap"  id="rightExtractsList"  >
+        <div class="unify-btn unify-btn1" v-on:click="showLeftExtractsList">
+            <i class="i-unify">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-wenzhai" />
+                </svg>
+            </i>
+            <span  class="unify-word">摘录</span>
+        </div>
+        <div class="abstract-ht clearfix">
+            我的摘录
+            <span class="ab-small">（共{{excerptListNumber}}条）</span>
+        </div>
+        <div class="abstract-hide "  id="js-scrollContainer">
+		     <li  v-for="(extract,index) in  extracts">
+			     <div class="bfc-l mr5">
+                    <span v-text="index+1"></span>.
+					<p class="cg5" v-html="extract.Type==1?extract.Content:decodeURIComponent(extract.Content)"></p>
+                </div>
+				<div class="ovhide">
+					 <p class="cg9">
+                        来源文献名称：
+                        <a href="javascript:void(0)"  v-text="'《'+extract.Title+'》'"></a>
+                    </p>
+
+				</div>
+
+
+			 </li>
+		
+		</div>
+    </div>
+</body>
+   <script>
+        var rightExtractsList = new Vue({
+		     el:"#rightExtractsList",
+			 data:{
+			    show:[],
+				extracts:[],
+				excerptListNumber:0
+			    
+			 },
+
+			 created:function(){
+			    $(".abstract-wrap").css("right", -450);
+			 },
+			 methods:{
+			    //打开摘录
+				showLeftExtractsList:function(){
+				     var _this = this;
+				     if(_this.show){
+					      _this.show = !_this.show;
+					       $(".abstract-wrap").css("right", 0);
+					 }else{
+					     _this.show = !_this.show;
+					     $(".abstract-wrap").css("right", -450);
+					 }
+				
+				}
+			 
+			 }
+		
+		})
+   
+   </script>
+   <style>
+    /* 外面的框 */
+    .abstract-wrap{
+        width:450px;
+        background: #626b79;
+        border-left: 5px solid #626b79;
+        right: 0px;
+        position: fixed;
+        top:0px;
+        bottom: 0px;
+		z-index:10000;
+    }
+
+    .unify-btn{
+        width:23px;
+        display: inline-block;
+        width: 40px;
+        font-size:16px;
+       
+    }
+
+    .abstract-hide{
+        position:absolute;
+        top:47px;
+        left:0;
+        right: 0;
+        bottom: 0;
+        overflow-y: auto;
+        background: #f9f9f9;
+    }
+     
+    .abstract-ht{
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        padding: 0 10px;
+        line-height: 42px;
+        
+    }
+
+    .ab-small{
+        color:#bac1cd;
+        font-size:14px;
+        margin-left: 10px;
+        align-items: center;
+    }
+    
+    .unify-btn{
+        position: absolute;
+        left:-43px; /* 让其向左移动 */
+        color: #FFFFFF;
+        font-size: 16px;
+        background: #404040;
+        padding: 5px 8px;
+        bottom:220px; /* 向下移动 */
+        cursor: pointer;
+        border-radius: 5px 0 0 5px;
+    }
+
+    .unify-word{
+        font-size: 12px;
+        bottom: 220px;
+		width: 40px;
+        display: inline-block;
+    }
+       .cg9, a.cg9, .n-m .i {
+           color: #999;
+           margin: 2px 0px 0px 24px;
+       }
+   .cg5{color:#555;}
+
+       p.cg5 {
+           margin: -25px 0px 0px 20px;
+       }
+
+	#rightExtractsList  .bfc-l{
+	    margin-left: 5px;
+	}
+	
+	.i-unify {
+    width: 23px;
+    height: 23px;
+    display: block;
+    margin: 0 auto 7px -1px;
+    font-size: 22px;
+	}
+	
+</style>
+</html>
+
+<!--图片放大功能 start-->
+
+
+<script src="/kxreader/Scripts/vue.js" type="text/javascript"></script>
+
+
+
+<script src="https://picx.cnki.net/sta_api/v1/scripts/sensors.min.js?v=20220929"></script>
+
+
+
+<script src="https://picx.cnki.net/search/common/login.js?v=20220425" type="text/javascript"></script>
+
+<script src="https://picx.cnki.net/kxreader/iconfont.js"></script>
+
+<script src="https://picx.cnki.net/kxreader/signLabel.js"></script> 
+
+<script src="/kxreader/Scripts/statisticsflow.js?v=20220729" type="text/javascript"></script>
+
+<script src="/kxreader/Scripts/ueditor/ueditor.config.js?v=20220105"></script>
+<script src="/kxreader/Scripts/ueditor/ueditor.all.js?v=20220105"></script>
+<script src="/kxreader/Scripts/ueditor/lang/zh-cn/zh-cn.js"></script>
+<script src="/kxreader/Scripts/ueditor/third-party/codemirror/codemirror.js"></script>
+<script src="/kxreader/Scripts/ueditor/third-party/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="https://picx.cnki.net/kxreader/MathJax-2.6-latest/MathJax.js?config=MML_HTMLorMML-full"></script>
+
+<script type="text/javascript" src="https://picx.cnki.net/kxreader/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="/kxreader/Scripts/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="https://picx.cnki.net/kxreader/jquery.imgbox.pack.js"></script>
+<script type="text/javascript" src="/kxreader/Scripts/layoutp.js"></script>
+<script>
+    // sensors.registerPage({
+    //     schema: 'yanxue_log_read',
+    //     app_id: 'CRSP_BASIC_KXREADER_TEMP'
+    // });
+
+
+
+    //setTimeout(function () {
+    //    sensors.toTrack({
+    //        event_id: "READ_view"
+    //    });
+    //}, 2000)
+
+</script>
+<script>
+
+     window.DBcode = "CJFQ";
+     window.filename = "ZZLL202106002";
+     console.log(window.filename);
+     window.resourceType = "JOURNAL";
+     console.log(window.resourceType);
+    //监听一下测试用例
+    //window.isPersonalUser = "";
+    //window.isOrgUser = "";
+    window.readCarefully ="1";
+    window.dbcode = "CJFQ";
+    //window.dbcode = 'CAPJ'
+    window.downloadEncrypt = '';
+    window.Clientip = "59.66.132.21";
+    //window.readCarefully = "";
+    //window.dbcode = 'CVSD';
+    //window.downloadEncrypt = null;
+
+    //统计
+sensors.registerPage({
+    schema: 'yanxue_log_read',
+    app_id: 'CRSP_BASIC_KXREADER_TEMP'
+});
+//实例化编辑器
+window.ue = UE.getEditor('editor', {
+    toolbars: [['bold', 'italic', 'underline', 'strikethrough', 'removeformat', 'link']],
+    wordCount: false,
+    autoHeightEnabled: false,
+    enableContextMenu: false,
+    enableAutoSave: false,
+    elementPathEnabled: false,
+    initialFrameHeight: 260
+
+});
+    //window.ue.loadServerConfig();
+//获得cookie
+    if (!!window.UserType&& window.UserType=="jf"&&window.BUserType =="") {
+        $(".main #souCang").css("display", "none");
+    $(".main #readSpecial").addClass("readOnly");
+
+    }
+    if('System.Web.Mvc.DynamicViewDataDictionary'!= null)
+    {
+        window.yanxueUrl = "https://x.cnki.net/read/readonline.ashx?dbcode=" + "CJFQ" + "&filename=" + "ZZLL202106002" + "&fileSourceType=1&fromId=CNKI_READ"
+        //测试环境换成"https://xtest.cnki.net/read/readonline.ashx?dbcode="
+    }
+    //获取cookie的LID
+    document.cookie.split(";").forEach(function (item, index) {
+        if (item.split('=')[0] == ' LID') {
+        window.Lid = item.split('=')[1] + "=" + item.split('=')[2];
+            //console.log('LID');
+            //console.log(window.Lid);
+        }
+
+    });
+    // 笔记存储在localstorage中
+    if (localStorage.getItem("alignmentStyle") == "leftStyle" && window.DBcode == 'CYFD') {
+        var head = document.getElementsByTagName('head')[0];
+    var link = document.createElement('link');
+    link.href = '../KXReader/Content/css/ydetail.css';
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    head.appendChild(link);
+    }
+    localStorage.removeItem("underLineMark1");
+    localStorage.removeItem("underHotMark1");
+    localStorage.removeItem("underNoteMark1");
+    localStorage.removeItem("underLineMark2");
+    localStorage.removeItem("underHotMark2");
+    localStorage.removeItem("underNoteMark2");
+    localStorage.removeItem("underExcerpt1");
+    localStorage.removeItem("underExcerpt2");
+    localStorage.removeItem("UnderlineMarks");
+    $(".p1 p").each(function (index, val) {
+        if (val.firstChild.nodeName == "MATHML") {
+        val.className = "code-formula"
+    }
+
+    });
+    if(!!$("p img[type='formula']")){
+        $("p img[type='formula']").each(function (index, val) {
+            val.parentNode.className = "code-formula"
+
+        })
+    }
+    $(function () {
+        var j = $.noConflict();
+    j("a.zoom-in").click(function(e){
+         debugger
+    var position = j("a.zoom-in").index(this);
+    var pos = position+1;
+    var srcHref = j("a.zoom-in")[position].children[0].currentSrc;
+    j(".zoom-in").imgbox(
+    {
+        src:srcHref,
+    'speedIn':0,
+    'speedOut':0,
+    'alignment':'center',
+    'overlayShow':true,
+    'allowMultiple':false
+          }
+    );
+       });
+
+
+    j(' .btn-zoomin').click(function (e) {
+      var position = j("a.btn-zoomin").index(this);
+      var pos = position + 1;
+      if (window.dbcode == 'CYFD') {
+          var srcHref = e.target.parentElement.parentElement.firstElementChild.currentSrc;
+      } else {
+          var srcHref = j("a.zoom-in")[position].children[0].currentSrc;
+      }
+      j(".zoom-in").imgbox({
+          'src': srcHref,
+          'speedIn': 0,
+          'speedOut': 0,
+          'alignment': 'center',
+          'overlayShow': true,
+          'allowMultiple': false
+        });
+      });
+
+      j("div[data-image='true'] img").click(function (e) {
+              var srcHref = e.target.currentSrc;
+      j("img").imgbox(
+      {
+          src: srcHref,
+      'speedIn': 0,
+      'speedOut': 0,
+      'alignment': 'center',
+      'overlayShow': true,
+      'allowMultiple': false
+                  }
+      );
+          });
+
+
+
+      if ((window.readCarefully !== null || window.readCarefully !== "") && window.dbcode != "CVSD" && (window.downloadEncrypt !== null || window.downloadEncrypt !== "")) {
+          window.inter = setInterval(fun, 1000);
+          }
+
+      //浏览器关闭弹出提示框---存入一个值在localStorage里面，如果存在这个值基本上就是能够存储进去的
+
+      //10s倒计时
+      var t = 1000;
+      function fun() {
+          t = t - 100;
+      if( j("#clockTime")[0]!=undefined||j("#clockTime")[0]!=null){
+          j("#clockTime")[0].innerHTML = t / 100;
+      }
+
+      if (t <= 0) {
+          if( j("#mainContent")[0]!=undefined||j("#mainContent")[0]!=null){
+          j("#mainContent").hide();
+        }
+      clearInterval(window.inter);
+          }
+    }
+
+
+
+    j("a#correct2.links").click(function (e) {
+        var obj = j("#GLSearch");
+    obj.css("display", "none");
+    $("#dictTransion").css("display","none");
+    var range = window.okmsReadRangeAt;//选中的范围
+    var NoteName = e.target.innerText;
+    //baseMain.layerAssembly(NoteName);
+    var paraDataId = window.okmsReadRangeAt.commonAncestorContainer.id ? window.okmsReadRangeAt.commonAncestorContainer.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.id ? window.okmsReadRangeAt.commonAncestorContainer.parentElement.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.parentElement.id;
+    window.paraId = paraDataId;
+    var rangeInfo = baseMain.setRangeInfo(window.okmsReadRangeAt, NoteName, paraDataId);
+    if (!rangeInfo) {
+        layer.msg("不允许跨段划词笔记", {
+            skin: "tip-orange"
+        });
+    return;
+        }
+
+    if (!rangeInfo.Quote) {
+        layer.msg("划词未划上，请重新划词", {
+            skin: "tip-orange"
+        });
+    return;
+        }
+
+
+    var type = 4;
+    if (!!rangeInfo && rangeInfo.html.indexOf("markline") !== -1 ) {
+        layer.msg("同种类型的笔记不能重叠！", {
+            skin: "tip-orange"
+        });
+    //清空划词内容
+    window.getSelection().empty();
+    return;
+        } else {
+            var outerHTML = rangeInfo.startContainer.parentNode ? rangeInfo.startContainer.parentNode.outerHTML : null;
+    var str = outerHTML || "";
+    var startIndex = str.indexOf("<markline");
+    var endIndex = str.indexOf("</markline>");
+var content = str.slice(startIndex, endIndex + '</markline>'.length);
+if (!!content && content.indexOf("xpltemp") !== - 1) {
+    if (!!outerHTML && outerHTML.indexOf("markline") !== -1) {
+        layer.msg("同种类型的笔记不能重叠！", {
+            skin: "tip-orange"
+        });
+        //清空划词内容
+        window.getSelection().empty();
+        return;
+    };
+}
+             }
+
+
+
+rangeInfo.Id = generateUuid();
+//配置笔记参数
+baseMain.dataParam = baseMain.addNoteAssembly(paraDataId, rangeInfo, type);
+if (baseMain.noteNumber < 2) {
+    baseMain.noteNumber++;
+    //将笔记内容存入所以笔记arr中
+    baseMain.allNoteContent.push(JSON.stringify(baseMain.dataParam));
+    baseMain.lineNoteArr.push(JSON.stringify(baseMain.dataParam));
+    console.log("划线笔记");
+    console.log(baseMain.lineNoteArr);
+    localStorage.setItem("underLineMark1", baseMain.lineNoteArr[0]);
+    if (baseMain.lineNoteArr.length == 2) {
+        localStorage.setItem("underLineMark2", baseMain.lineNoteArr[1]);
+    }
+    //渲染笔记内容
+    baseMain.RenderNotes(baseMain.allNoteContent);
+} else if (baseMain.noteNumber >= 2) {
+    if (!!window.UserType && window.UserType == "bk" || !window.notFirstLoginLID) {
+        baseMemerOffline.Clientip = '59.66.132.21';
+        baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+        baseMemerOffline.message = "";
+        baseMemerOffline.url = window.yanxueUrl;
+        baseMemerOffline.lang = "zh";
+        baseMemerOffline.regshow = false;
+        baseMemerOffline.phone = "";
+        baseMemerOffline.sourcelogincon.librarysource = 0;
+        baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+        baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+        baseMemerOffline.sourcelogincon.Token = window.Lid;
+        baseMemerOffline.sourcelogincon.DoubleLogin = true;
+        baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+        baseMemerOffline.loginshow = true;
+        baseMemerOffline.GLSearchType = "划线";
+        baseMemerOffline.GLSearchContent = "个人账号登录后，划线内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+        baseMemerOffline.commentsContent = "注：该功能仅对个人账号登录用户开放，请登录个人账号使用。";
+        baseMemerOffline.GLSearchCopyShow = true;
+
+    } else {
+        var promotObject = {};
+        promotObject.promptName = event.target.innerText;
+        promotObject.promotContent = "进入研学后，可继续使用该功能，划线笔记内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+        baseMain.promptLayer(promotObject);
+        //$("#correct2").attr('href', window.yanxueUrl);
+    }
+
+}
+
+
+
+
+        });
+//高亮
+j("a#highLight2.links").click(function (e) {
+    var obj = j("#GLSearch");
+    obj.css("display", "none");
+    $("#dictTransion").css("display", "none");
+    var range = window.okmsReadRangeAt;//选中的范围
+    var NoteName = e.target.innerText;
+    var paraDataId = window.okmsReadRangeAt.commonAncestorContainer.id ? window.okmsReadRangeAt.commonAncestorContainer.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.id ? window.okmsReadRangeAt.commonAncestorContainer.parentElement.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.parentElement.id;
+    window.paraId = paraDataId;
+    var rangeInfo = baseMain.setRangeInfo(range, NoteName, paraDataId);
+    if (!rangeInfo) {
+        layer.msg("不允许跨段做高亮笔记", {
+            skin: "tip-orange"
+        });
+        return;
+    }
+
+    if (!rangeInfo.Quote) {
+        layer.msg("划词未划上，请重新划词", {
+            skin: "tip-orange"
+        });
+        return;
+    }
+
+
+
+    var type = 5;
+    if (!!rangeInfo && rangeInfo && rangeInfo.html.indexOf("markline") !== -1 && rangeInfo.html.indexOf("background") !== -1) {
+        console.log("同种笔记类型的高亮笔记不能重叠");
+        //清空划词内容
+        window.getSelection().empty();
+        return;
+    } else {
+        var outerHTML = rangeInfo.startContainer.parentNode ? rangeInfo.startContainer.parentNode.outerHTML : null;
+        var str = outerHTML || "";
+        var startIndex = str.indexOf("<markline");
+        var endIndex = str.indexOf("</markline>");
+        var content = str.slice(startIndex, endIndex + '</markline>'.length);
+        if (!!content && content.indexOf("xpltemp") !== - 1) {
+            if (!!outerHTML && outerHTML.indexOf("markline") !== -1) {
+                layer.msg("同种类型的笔记不能重叠！", {
+                    skin: "tip-orange"
+                });
+                //清空划词内容
+                window.getSelection().empty();
+                return;
+            };
+        }
+    }
+
+    rangeInfo.Id = generateUuid();
+    //配置笔记参数
+    baseMain.dataParam = baseMain.addNoteAssembly(paraDataId, rangeInfo, type);
+    if (baseMain.noteNumber < 2) {
+        baseMain.noteNumber++;
+        //将笔记内容存入所以笔记arr中
+        baseMain.allNoteContent.push(JSON.stringify(baseMain.dataParam));
+        baseMain.lightNoteArr.push(JSON.stringify(baseMain.dataParam));
+        console.log("高亮笔记");
+        console.log(baseMain.lightNoteArr);
+        localStorage.setItem("underHotMark1", baseMain.lightNoteArr[0]);
+        if (baseMain.lightNoteArr.length == 2) {
+            localStorage.setItem("underHotMark2", baseMain.lightNoteArr[1]);
+        }
+        //渲染笔记内容
+        baseMain.RenderNotes(baseMain.allNoteContent);
+
+    } else if (baseMain.noteNumber >= 2) {
+
+        //将下面的抽取成一个函数，一样的都直接写死
+        if (!!window.UserType && window.UserType == "bk" || !window.notFirstLoginLID) {
+            baseMemerOffline.Clientip = '59.66.132.21';
+            baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+            baseMemerOffline.message = "";
+            baseMemerOffline.url = window.yanxueUrl;
+            baseMemerOffline.lang = "zh";
+            baseMemerOffline.regshow = false;
+            baseMemerOffline.phone = "";
+            baseMemerOffline.sourcelogincon.librarysource = 0;
+            baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+            baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+            baseMemerOffline.sourcelogincon.Token = window.Lid;
+            baseMemerOffline.sourcelogincon.DoubleLogin = true;
+            baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+            baseMemerOffline.loginshow = true;
+            baseMemerOffline.GLSearchType = "高亮";
+            baseMemerOffline.GLSearchContent = "个人账号登录后，高亮内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+            baseMemerOffline.commentsContent = "注：该功能仅对个人账号登录用户开放，请登录个人账号使用。";
+            baseMemerOffline.GLSearchCopyShow = true;
+
+
+        } else {
+            var promotObject = {};
+            promotObject.promptName = event.target.innerText;
+            promotObject.promotContent = "进入研学后，可继续使用该功能，高亮笔记内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+            baseMain.promptLayer(promotObject);
+            //$("#highLight2").attr('href', window.yanxueUrl);
+        }
+    }
+
+
+
+});
+
+//笔记
+j("a#addnote2.links").click(function (e) {
+    var obj = j("#GLSearch");
+    obj.css("display", "none");
+    $("#dictTransion").css("display", "none");
+    //无论什么账号进来就先记录笔记，然后当记录完笔记之后再走下面的逻辑
+    //编辑器
+    //ueAssembly();
+    var NoteName = e.target.innerText;
+    //baseMain.layerAssembly(NoteName);
+    var paraDataId = window.okmsReadRangeAt.commonAncestorContainer.id ? window.okmsReadRangeAt.commonAncestorContainer.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.id ? window.okmsReadRangeAt.commonAncestorContainer.parentElement.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.parentElement.id;
+
+    if (baseMain.noteNumber < 2) {
+        var rangeInfo = baseMain.setRangeInfo(window.okmsReadRangeAt, NoteName, paraDataId);
+        //paraDataId == ""的现象在这里就会被做出返回判断
+        if (!rangeInfo) {
+            layer.msg("不允许跨段做笔记", {
+                skin: "tip-orange"
+            });
+            return;
+        }
+
+
+        if (!rangeInfo.Quote) {
+            layer.msg("划词未划上，请重新划词", {
+                skin: "tip-orange"
+            });
+            return;
+        }
+
+
+        var type = 3;
+
+        //
+        if (!!rangeInfo && rangeInfo.html.indexOf("markline") !== -1 && rangeInfo.html.indexOf("background") !== -1) {
+            console.log("同种笔记类型的笔记不能重叠");
+            //清空划词内容
+            window.getSelection().empty();
+            return;
+        } else {
+            var outerHTML = rangeInfo.startContainer.parentNode ? rangeInfo.startContainer.parentNode.outerHTML : null;
+            var str = outerHTML || "";
+            var startIndex = str.indexOf("<markline");
+            var endIndex = str.indexOf("</markline>");
+            var content = str.slice(startIndex, endIndex + '</markline>'.length);
+            if (!!content && content.indexOf("xpltemp") !== - 1) {
+                if (!!outerHTML && outerHTML.indexOf("markline") !== -1) {
+                    layer.msg("同种类型的笔记不能重叠！", {
+                        skin: "tip-orange"
+                    });
+                    //清空划词内容
+                    window.getSelection().empty();
+                    return;
+                };
+            }
+        }
+
+
+        //
+        //rangeInfo.Id = Number(new Date()) + String(Math.random() + Math.random()).replace(/\d\.\d{10}/, '-');
+        rangeInfo.Id = generateUuid();
+        baseMain.dataParam = baseMain.addNoteAssembly(paraDataId, rangeInfo, type);
+        //打开百度编辑框---传入标签插件参数
+        window.baseUeditor.signLabelOption.clickType = 1;
+        window.baseUeditor.signLabelOption.objectId = rangeInfo.Id;
+        window.baseUeditor.signLabelOption.appid = "CRSP_BASIC_PSMC", //測試環境為"CRSP_PSMC_RELEASE"
+            window.baseUeditor.signLabelOption.fileSourceType = 1,
+            window.baseUeditor.signLabelOption.type = 3;
+        window.baseUeditor.signLabelOption.type = 3;
+        window.baseUeditor.signLabelOption.temp = new Date().getTime();
+        window.baseUeditor.isShowSignFlag = true;
+        j("#labelcontent").css("display", "block");
+        baseMain.layerAssembly(paraDataId, rangeInfo);
+
+    } else if (baseMain.noteNumber >= 2) {
+        if (!!window.UserType && window.UserType == "bk" || !window.notFirstLoginLID) {
+            baseMemerOffline.Clientip = '59.66.132.21';
+            baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+            baseMemerOffline.message = "";
+            baseMemerOffline.url = window.yanxueUrl;
+            baseMemerOffline.lang = "zh";
+            baseMemerOffline.regshow = false;
+            baseMemerOffline.phone = "";
+            baseMemerOffline.sourcelogincon.librarysource = 0;
+            baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+            baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+            baseMemerOffline.sourcelogincon.Token = window.Lid;
+            baseMemerOffline.sourcelogincon.DoubleLogin = true;
+            baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+            baseMemerOffline.loginshow = true;
+            baseMemerOffline.GLSearchType = "笔记";
+            baseMemerOffline.GLSearchContent = "个人账号登录后，划线内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+            baseMemerOffline.commentsContent = "注：该功能仅对个人账号登录用户开放，请登录个人账号使用。";
+            baseMemerOffline.GLSearchCopyShow = true;
+
+        } else {
+            var promotObject = {};
+            promotObject.promptName = event.target.innerText;
+            promotObject.promotContent = "进入研学后，可继续使用该功能，笔记内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+            baseMain.promptLayer(promotObject);
+            //$("#addnote2").attr('href', window.yanxueUrl);
+        }
+    }
+});
+
+//摘录
+j("a#addcentor2.links").click(function (event, type) {
+    //debugger
+    var _this = this;
+    var obj = j("#GLSearch");
+    obj.css("display", "none");
+    $("#dictTransion").css("display", "none");
+    //无论什么账号进来就先记录笔记，然后当记录完笔记之后再走下面的逻辑
+    //编辑器
+    //ueAssembly();
+    var NoteName = event.target.innerText;
+    //baseMain.layerAssembly(NoteName);
+    var paraDataId = window.okmsReadRangeAt.commonAncestorContainer.id ? window.okmsReadRangeAt.commonAncestorContainer.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.id ? window.okmsReadRangeAt.commonAncestorContainer.parentElement.id : window.okmsReadRangeAt.commonAncestorContainer.parentElement.parentElement.id;
+    if (baseMain.noteNumber < 2) {
+        baseMain.excerpt(event.pageX, event.pageY, paraDataId, NoteName);
+    } else if (baseMain.noteNumber >= 2) {
+
+        if (!!window.UserType && window.UserType == "bk" || !window.notFirstLoginLID) {
+            baseMemerOffline.Clientip = '59.66.132.21';
+            baseMemerOffline.ssoappid = "CRSP_KXREADER_APICLIENT_RELEASE";
+            baseMemerOffline.message = "";
+            baseMemerOffline.url = window.yanxueUrl;
+            baseMemerOffline.lang = "zh";
+            baseMemerOffline.regshow = false;
+            baseMemerOffline.phone = "";
+            baseMemerOffline.sourcelogincon.librarysource = 0;
+            baseMemerOffline.sourcelogincon.LoginOrgAccount = true;
+            baseMemerOffline.sourcelogincon.Fromid = 'CNKI_Read';
+            baseMemerOffline.sourcelogincon.Token = window.Lid;
+            baseMemerOffline.sourcelogincon.DoubleLogin = true;
+            baseMemerOffline.sourcelogincon.callback = window.callbackFunction;
+            baseMemerOffline.loginshow = true;
+            baseMemerOffline.GLSearchType = "摘录";
+            baseMemerOffline.GLSearchContent = "个人账号登录后，摘录内容默认保存至我的摘录库。在线创作时可将摘录内容添加到文中，自动生成引用关系，参考文献自动编号。";
+            baseMemerOffline.commentsContent = "注：该功能仅对个人账号登录用户开放，请登录个人账号使用。";
+            baseMemerOffline.GLSearchCopyShow = true;
+            // 点击鼠标先隐藏按钮
+            var obj = j("#GLSearch");
+            obj.css("display", "none");
+        } else {
+            var promotObject = {};
+            promotObject.promptName = event.target.innerText;
+            promotObject.promotContent = "进入研学后，可继续使用该功能，摘录笔记内容默认保存至我的笔记，方便您进行笔记归纳整理及回顾。";
+            baseMain.promptLayer(promotObject);
+            // $("#addcentor2").attr('href', window.yanxueUrl);
+        }
+    }
+
+});
+
+//生成笔记id
+function generateUuid() {
+    const s = []
+    const hexDigits = '0123456789abcdef'
+    for (let i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1)
+    }
+    s[14] = '4' // bits 12-15 of the time_hi_and_version field to 0010
+    // eslint-disable-next-line no-bitwise
+    s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1) // bits 6-7 of the clock_seq_hi_and_reserved to 01
+    // eslint-disable-next-line no-multi-assign
+    s[8] = s[13] = s[18] = s[23] = '-'
+
+    const uuid = s.join('')
+    return uuid
+}
+    });
+/* biaoqian */
+window.baseUeditor = new Vue({
+    el: "#ueditorId",
+    data: function () {
+        return {
+            signLabelOption: {
+                appid: "",
+                fileSourceType: "",
+                type: "",
+                clickType: "",
+                objectId: "",
+
+            },
+
+            isShowSignFlag: false,
+            noteNumber: 0,//笔记记录成功才会增加1 保险的方法就是存进了localStorage里面才可以
+            dataParam: [],
+            noteTreeContent: "",
+            allNoteContent: [],
+            chapterWrapContent: []
+        }
+    },
+
+
+
+    created: function () {
+
+
+    },
+
+    methods: function () {
+
+    }
+
+});
+/*会员到期信息及下线*/
+var baseMemerOffline = new Vue({
+    el: "#readlogin",
+    data: {
+        // 会员信息
+        tipshow: false,                             // 会员信息到期提示
+        tipcontent: "",                              // 显示会员到期的提示内容信息
+        showform: "mask",                           // 弹框形式 弹窗显示传mask，页面显示传html
+        lang: "",                                   // 弹框语言
+        code: "",                                    // 会员权限code码
+        environment: "",                            // 处于的环境
+        // 下线信息
+        Clientip: "",                              // 用户IP
+        loginshow: false,                         // 登录弹窗的显示与否
+        message: "",                              // 下线原因
+        sourcelogincon: {
+            librarysource: '0',
+            LoginOrgAccount: true,
+            Fromid: 'CNKI_Read',
+            Token: window.Lid,
+            DoubleLogin: true
+
+        },
+        url: "",                                  // 再次登录需要跳转的地方
+        regshow: false,                           // 是否直接显示注册页面
+        phone: "",                                // 用户手机号
+        ssoappid: "",                           // 系统App Id
+        //librarysource: 0,
+        GLSearchType: "",
+        GLSearchContent: "",
+        GLSearchCopyShow: false,                   //判断复制框是否出现
+        GLSearchContent: '',
+        commentsContent: "",
+        callbackObj: '',
+        browserUrl: '',
+        lineWordKey: ''
+    },
+
+
+    created: function () {
+        window.callbackFunction = function callbackFunction(params, callback) {
+            var _this = this;
+            var data = {
+                // uid: window.Lid,
+                uid: window.cookieAndLid
+            };
+            $.ajax({
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/x-www-form-urlencoded",
+                //dataType: "json",
+                //请求地址
+                url: "/kxreader/login/LoginIn",
+                //数据，json字符串
+                data: data,
+                //请求成功
+                success: function (result) {
+                    var param = window.lineParam;
+                    if (!param) {
+                        sensors.toTrack({
+                            event_id: "READ_guide_login",
+                            ent_secondary_id: param
+                        });
+                    } else {
+                        sensors.toTrack({
+                            event_id: "READ_login",
+                            event_secondary_id: param
+                        });
+                    }
+
+                    baseMain.addAllCentor();
+                    baseMain.addAllNote();
+                    window.open(window.browserUrl, "_self");  //不能缺少‘self’
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+
+
+                }
+
+            });
+
+
+            //var param = window.lineParam;
+            //if (!param) {
+            //    sensors.toTrack({
+            //        event_id: "READ_guide_login",
+            //        ent_secondary_id: param
+            //    });
+            //} else {
+            //    sensors.toTrack({
+            //        event_id: "READ_login",
+            //        event_secondary_id: param
+            //    });
+            //}
+
+            //baseMain.addAllCentor();
+            // baseMain.addAllNote();
+            //window.open(window.browserUrl, "_self");  //不能缺少‘self’
+
+        }
+
+    },
+
+    methods: {
+        // 关闭登录弹窗事件
+        closelogin: function (e) {
+            var _this = this;
+            var cookiesLid = e;
+            var cookieLID = "";
+            window.browserUrl = e;
+            if (!!cookiesLid) {
+                cookiesLid.split("?")[1].split("&").forEach(function (item, index) {
+                    if (item.split('=')[0] == "LID") {
+                        cookieLID = item.split('=')[1] + "=" + item.split('=')[2];
+                        //console.log('LID');
+                        //console.log(window.Lid);
+                    }
+
+                });
+
+            }
+
+            window.cookieAndLid = cookieLID;
+            _this.loginshow = false;
+
+        },
+
+
+
+
+        toTrack: function (e, param) {
+            sensors.toTrack({
+                event_id: e,
+                ent_secondary_id: param
+            }/*,function() {
+                console.log('my callback running!');
+            }*/);
+        }
+
+
+    }
+});
+
+</script>
+<script>
+</script>
+
+<!--图片放大功能 end-->
+<div class="fixedbar">
+    <div class="backtop hiddenV" id="backtop">
+        <a id="backTopSide" href="javascript:scroll(0,0);" title=""></a>
+    </div>
+</div>
+
+    </div>
+</body>
+</html>

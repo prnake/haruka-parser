@@ -127,9 +127,11 @@ if __name__ == "__main__":
     if "cnki" in sys.argv[1]:
         configuration["extract_cnki_latex"] = True
         data = parse_cnki(html)
-        data["raw_content"] = "\n".join(
-            [extract_text(i, configuration)[0] for i in data["content"]]
-        ).replace("导出到EXCEL", "")
+        data["raw_content"] = (
+            "\n".join([extract_text(i, configuration)[0] for i in data["content"]])
+            .replace("导出到EXCEL", "")
+            .replace("下载原图", "")
+        )
         data["content"] = (
             data["raw_content"]
             .replace("\\$", "[extract_itex]")
