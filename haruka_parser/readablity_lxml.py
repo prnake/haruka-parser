@@ -326,12 +326,12 @@ except ImportError:
 
 REGEXES = {
     "unlikelyCandidatesRe": re.compile(
-        r"combx|comment|community|disqus|extra|foot|header|menu|remark|rss|shoutbox|sidebar|sponsor|ad-break|agegate|pagination|pager|popup|tweet|twitter",
+        r"header|disqus|comment|rss|footer|extra|community|menu|agegate|recommend|share|sponsor|social|top|report-infor|tweet|remark|copyright|foot|register|fixed-bar|related|logo|pagination|submeta|shoutbox|fenxiang|disclaimer|sidebar|login|popup|video-title|fixedNav|copy-right|ad-break|combx|pager|contribution|twitter",
         re.I,
     ),
     "okMaybeItsACandidateRe": re.compile(r"and|article|body|column|main|shadow", re.I),
     "positiveRe": re.compile(
-        r"article|body|content|entry|hentry|main|page|pagination|post|text|blog|story",
+        r"article|body|content|entry|hentry|main|page|pagination|post|text|blog|story|markdown|post_text|news_txt|detail",
         re.I,
     ),
     "negativeRe": re.compile(

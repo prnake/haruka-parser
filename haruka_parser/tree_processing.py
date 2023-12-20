@@ -1,7 +1,9 @@
 import re
 import lxml
+from html import unescape
 from haruka_parser.utils import has_style
 from haruka_parser.line_processing import restore_replacements, have_chinese_characters
+from haruka_parser.time_formatter import return_format_datetime
 from tabulate import tabulate
 from resiliparse.parse.html import DOMCollection
 from resiliparse.parse.html import HTMLTree
@@ -492,13 +494,23 @@ def add_match(collection, text, orig):
             collection.add(text)
 
 
+META_TITLE_XPATHS = [
+    'meta[property="og:title"]',
+    'meta[name="twitter:title"]',
+    'meta[property="twitter:title"]',
+]
+
 # order matters
 TITLE_CSS_HEURISTICS = [
     "h1",
     "h2",
     "h3",
     "#title",
+    "#Title",
+    "#TITLE",
     ".title",
+    ".Title",
+    ".TITLE",
     "#head",
     ".head",
     "#heading",
@@ -510,7 +522,13 @@ TITLE_CSS_HEURISTICS = [
 ]
 
 
-def get_title(doc: HTMLTree) -> str:
+def _get_title(doc: HTMLTree) -> str:
+    # parse twitter
+    for item in META_TITLE_XPATHS:
+        for e in doc.body.query_selector_all(item):
+            if e.getattr("content"):
+                return e.getattr("content")
+
     if doc is None:
         return ""
     title = doc.title.strip()
@@ -555,6 +573,10 @@ def get_title(doc: HTMLTree) -> str:
     return title or ""
 
 
+def get_title(doc: HTMLTree) -> str:
+    return unescape(_get_title(doc))
+
+
 def get_lxml_tree(html_content):
     """Obtain the HTML parse tree for the given HTML content.
 
@@ -582,3 +604,139 @@ def get_lxml_tree(html_content):
             return lxml.html.fromstring("<pre>" + html_content + "</pre>")
         except:
             return None
+
+
+META_TIME_XPATHS = [
+    '//meta[contains(@name, "og:time")]/@content',
+    '//meta[contains(@name, "PubDate")]/@content',
+    '//meta[contains(@name, "pubtime")]/@content',
+    '//meta[contains(@name, "_pubtime")]/@content',
+    '//meta[contains(@name, "apub:time")]/@content',
+    '//meta[contains(@pubdate, "pubdate")]/@content',
+    '//meta[contains(@name, "publishdate")]/@content',
+    '//meta[contains(@name, "PublishDate")]/@content',
+    '//meta[contains(@name, "sailthru.date")]/@content',
+    '//meta[contains(@itemprop, "dateUpdate")]/@content',
+    '//meta[contains(@name, "publication_date")]/@content',
+    '//meta[contains(@itemprop, "datePublished")]/@content',
+    '//meta[contains(@property, "og:release_date")]/@content',
+    '//meta[contains(@name, "article_date_original")]/@content',
+    '//meta[contains(@property, "og:published_time")]/@content',
+    '//meta[contains(@property, "rnews:datePublished")]/@content',
+    '//meta[contains(@name, "OriginalPublicationDate")]/@content',
+    '//meta[contains(@name, "weibo: article:create_at")]/@content',
+    '//meta[@name="Keywords" and contains(@content, ":")]/@content',
+    '//meta[contains(@property, "article:published_time")]/@content',
+]
+
+SUPPLEMENT_TIME_XPATHS = [
+    '//div[@class="time fix"]//text()',
+    '//span[@id="pubtime_baidu"]/text()',
+    '//i[contains(@class, "time")]/text()',
+    '//span[contains(text(), "时间")]/text()',
+    '//div[contains(@class, "time")]//text()',
+    '//span[contains(@class, "date")]/text()',
+    '//div[contains(@class, "info")]//text()',
+    '//span[contains(@class, "time")]/text()',
+    '//div[contains(@class, "_time")]/text()',
+    '//span[contains(@id, "paperdate")]/text()',
+    '//em[contains(@id, "publish_time")]/text()',
+    '//time[@data-testid="timestamp"]/@dateTime',
+    '//span[contains(@id, "articleTime")]/text()',
+    '//span[contains(@class, "pub_time")]/text()',
+    '//span[contains(@class, "item-time")]/text()',
+    '//span[contains(@class, "publishtime")]/text()',
+    '//div[contains(@class, "news_time_source")]/text()',
+]
+
+REGEX_TIME = [
+    "(\d{1,2}月\d{1,2}日)",
+    "(\d{2}年\d{1,2}月\d{1,2}日)",
+    "(\d{4}年\d{1,2}月\d{1,2}日)",
+    "(\d{2}[-|/|.]\d{1,2}[-|/|.]\d{1,2})",
+    "(\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2})",
+    "(\d{1,2}月\d{1,2}日\s*?[2][0-3]:[0-5]?[0-9])",
+    "(\d{1,2}月\d{1,2}日\s*?[0-1]?[0-9]:[0-5]?[0-9])",
+    "(\d{2}年\d{1,2}月\d{1,2}日\s*?[2][0-3]:[0-5]?[0-9])",
+    "(\d{4}年\d{1,2}月\d{1,2}日\s*?[2][0-3]:[0-5]?[0-9])",
+    "(\d{2}年\d{1,2}月\d{1,2}日\s*?[0-1]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}年\d{1,2}月\d{1,2}日\s*?[0-1]?[0-9]:[0-5]?[0-9])",
+    "(\d{1,2}月\d{1,2}日\s*?[1-24]\d时[0-60]\d分)([1-24]\d时)",
+    "(\d{1,2}月\d{1,2}日\s*?[2][0-3]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[2][0-3]:[0-5]?[0-9])",
+    "(\d{1,2}月\d{1,2}日\s*?[0-1]?[0-9]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{2}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[2][0-3]:[0-5]?[0-9])",
+    "(\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[0-1]?[0-9]:[0-5]?[0-9])",
+    "(\d{2}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[0-1]?[0-9]:[0-5]?[0-9])",
+    "(\d{2}年\d{1,2}月\d{1,2}日\s*?[1-24]\d时[0-60]\d分)([1-24]\d时)",
+    "(\d{4}年\d{1,2}月\d{1,2}日\s*?[1-24]\d时[0-60]\d分)([1-24]\d时)",
+    "(\d{2}年\d{1,2}月\d{1,2}日\s*?[2][0-3]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}年\d{1,2}月\d{1,2}日\s*?[2][0-3]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{2}年\d{1,2}月\d{1,2}日\s*?[0-1]?[0-9]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}年\d{1,2}月\d{1,2}日\s*?[0-1]?[0-9]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[1-24]\d时[0-60]\d分)([1-24]\d时)",
+    "(\d{2}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[1-24]\d时[0-60]\d分)([1-24]\d时)",
+    "(\d{2}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[2][0-3]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[2][0-3]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{4}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[0-1]?[0-9]:[0-5]?[0-9]:[0-5]?[0-9])",
+    "(\d{2}[-|/|.]\d{1,2}[-|/|.]\d{1,2}\s*?[0-1]?[0-9]:[0-5]?[0-9]:[0-5]?[0-9])",
+]
+
+
+def get_valid_length_time(publish_time_list):
+    if len(publish_time_list) > 0:
+        length_valid_publish_time = [y for y in publish_time_list if len(y) >= 9]
+        publish_time = (
+            length_valid_publish_time[0]
+            if length_valid_publish_time
+            else publish_time_list[0]
+        )
+    else:
+        publish_time = ""
+    return publish_time
+
+
+def extract_time_from_meta(html_tree):
+    for each_meta_xpath in META_TIME_XPATHS:
+        publish_time_temp = html_tree.xpath(each_meta_xpath)
+        if publish_time_temp:
+            return "".join(publish_time_temp).strip()
+    return ""
+
+
+def extract_time_from_other_tag(html_tree):
+    publish_time_list = []
+    for each_xpath in SUPPLEMENT_TIME_XPATHS:
+        publish_time_temp = "".join(html_tree.xpath(each_xpath)).strip()
+        if publish_time_temp:
+            publish_time_list += [
+                re.findall(x, publish_time_temp)[0]
+                for x in REGEX_TIME
+                if re.findall(x, publish_time_temp)
+            ]
+    return get_valid_length_time(publish_time_list)
+
+
+def extract_time_from_html(content):
+    publish_time_list = []
+    for each_time_regex in REGEX_TIME:
+        publish_time_temp = re.findall(each_time_regex, content)
+        if publish_time_temp:
+            publish_time_list += publish_time_temp
+    return get_valid_length_time(publish_time_list)
+
+
+def extract_time(content, html_tree):
+    publish_time = ""
+    meta_date = extract_time_from_meta(html_tree)
+    if meta_date:
+        publish_time = return_format_datetime(meta_date)
+    else:
+        tag_date = extract_time_from_other_tag(html_tree)
+        if tag_date:
+            publish_time = return_format_datetime(tag_date)
+        else:
+            html_date = extract_time_from_html(content)
+            if html_date:
+                publish_time = return_format_datetime(html_date)
+    return publish_time

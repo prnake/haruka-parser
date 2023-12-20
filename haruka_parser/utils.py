@@ -2,7 +2,6 @@ import re
 import yaml
 import numpy as np
 
-
 def has_style(style, styles):
     """Does the style string contain any of the styles?
     This function is robust to variations in the spaces between the styles.

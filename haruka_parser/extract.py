@@ -33,6 +33,7 @@ from haruka_parser.tree_processing import (
     post_process_headings,
     get_title,
     get_lxml_tree,
+    extract_time,
 )
 from haruka_parser.line_processing import (
     remove_empty_headers,
@@ -240,6 +241,7 @@ def extract_text(html, config=DEFAULT_CONFIG):
         "table": 0,
         "chinese_table": 0,
         "title": "",
+        "time": "",
     }
 
     if not html:
@@ -248,9 +250,17 @@ def extract_text(html, config=DEFAULT_CONFIG):
     # NFCK normalization
     html = ftfy.fix_text(html)
 
-    info["title"] = get_title(HTMLTree.parse(html))
+    pre_process_resiliparse_tree = HTMLTree.parse(html)
+    pre_process_tree = get_lxml_tree(html)
+
+    # TODO: Using the same tree parser
+    try: info["title"] = get_title(pre_process_resiliparse_tree)
+    except: pass
+    try: info["time"] = extract_time(html, pre_process_tree)
+    except: pass
+
     if config["readability"]:
-        html = Document(html).summary()
+        html = Document(pre_process_tree).summary()
 
     html = html_preprocessing(html, config)
     tree = HTMLTree.parse(html)
